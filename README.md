@@ -15,6 +15,9 @@ three interactive tools:
 - **Program willingness to pay** (`dce.html`): a utility-facing tool from the discrete choice experiment —
   set a program's carbon-reduction, efficiency, and rebate levels and the target population, and see the
   predicted average household stated willingness to pay.
+- **Solar rebound & carbon** (`solar.html`): a utility-facing tool from the solar-rebound analysis —
+  enter the number of solar adopters and a grid emission factor, and see the electricity load reduction,
+  natural-gas change, and CO2 reduction, with the rebound effect made explicit.
 
 Every page is fully self-contained (Chart.js and all numbers are embedded), so they need no build step,
 no server, and no internet connection. Served via GitHub Pages from the repo root; the host

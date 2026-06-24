@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Los Alamos Electrification Tools</title>
+<title>Solar Adoption: Load &amp; Carbon Impact</title>
 <script>/**
  * Skipped minification because the original files appears to be already minified.
  * Original file: /npm/chart.js@4.4.1/dist/chart.umd.js
@@ -26,139 +26,310 @@
 //# sourceMappingURL=chart.umd.js.map
 </script>
 <style>
-  :root{--navy:#1f3864;--blue:#2e5496;--ink:#1c2530;--muted:#5b6776;--line:#e2e7ee;--bg:#f5f7fa;--card:#fff}
-  *{box-sizing:border-box} html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55}
-  header{background:var(--navy);color:#fff;padding:30px 28px}
-  header .wrap{max-width:980px;margin:0 auto}
-  header h1{margin:0;font-size:25px;font-weight:700;letter-spacing:.2px}
-  header p{margin:8px 0 0;font-size:14.5px;color:#c7d2e4;max-width:760px}
-  main{max-width:980px;margin:0 auto;padding:26px 22px 8px}
-  .intro{font-size:14.5px;color:var(--muted);max-width:760px;margin:0 0 22px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:18px}
-  @media(max-width:520px){.grid{grid-template-columns:1fr}}
-  .card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);
-    border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;
-    box-shadow:0 1px 2px rgba(20,40,80,.05);transition:transform .12s,box-shadow .12s}
-  .card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(20,40,80,.12)}
-  .card .accent{height:6px}
-  .card .thumb{position:relative;height:128px;padding:12px 14px 2px;background:#fbfcfe;border-bottom:1px solid var(--line)}
-  .card .body{padding:16px 20px 20px;display:flex;flex-direction:column;flex:1}
-  .card .tag{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
-  .card h2{margin:7px 0 8px;font-size:18px;font-weight:700}
-  .card p{margin:0 0 16px;font-size:13.5px;color:var(--muted);flex:1}
-  .card .open{font-size:13.5px;font-weight:700;color:var(--blue)}
-  .about{margin:30px 0 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
-  .about h3{margin:0 0 8px;font-size:16px} .about p{margin:0 0 10px;font-size:13.5px;color:var(--muted)}
-  footer{max-width:980px;margin:0 auto;padding:22px;font-size:12px;color:var(--muted);text-align:center}
+  :root{
+    --navy:#1f3864; --blue:#2e5496; --elec:#37618e; --gas:#d98c3f; --co2:#5a9e6f; --grey:#9aa7b4;
+    --ink:#1c2530; --muted:#5b6776; --line:#e2e7ee; --bg:#f5f7fa; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+  header{background:var(--navy);color:#fff;padding:20px 28px;display:flex;justify-content:space-between;
+         align-items:center;gap:18px;flex-wrap:wrap}
+  header h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.2px}
+  header p{margin:4px 0 0;font-size:13px;color:#c7d2e4;max-width:780px}
+  .nav{display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+  .nav a,.about-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.42);color:#fff;
+    border-radius:9px;padding:10px 16px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;
+    text-decoration:none;font-family:inherit}
+  .nav a:hover,.about-btn:hover{background:rgba(255,255,255,.26)}
+  main{display:grid;grid-template-columns:340px minmax(0,1fr);gap:22px;padding:22px;align-items:start}
+  main>*{min-width:0}
+  @media(max-width:920px){ main{grid-template-columns:1fr} .controls{order:1} main>section{order:2} }
+  @media(max-width:600px){
+    header{padding:15px 16px} header h1{font-size:18px}
+    header p{font-size:12.5px} .nav a,.about-btn{padding:8px 12px;font-size:12px}
+  }
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:18px 0 9px}
+  h2:first-of-type{margin-top:4px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+    box-shadow:0 1px 2px rgba(20,40,80,.04)}
+  .controls .hint{font-size:12px;color:var(--muted);margin:-4px 0 10px}
+  .ctl{margin:13px 0}
+  .ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink);margin-bottom:4px}
+  .ctl label b{font-weight:700;color:var(--blue);font-size:13.5px}
+  .ctl .lvl{font-size:11px;color:var(--muted);margin-top:2px}
+  input[type=range]{width:100%;accent-color:var(--blue);cursor:pointer}
+  .num{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:9px 0;font-size:13px}
+  .num label{color:var(--muted)} .num .u{color:var(--muted);font-size:11.5px}
+  .num input{width:90px;text-align:right;border:1px solid var(--line);border-radius:6px;padding:5px 7px;
+    font-family:inherit;font-size:13px}
+  details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  summary{font-size:12.5px;color:var(--blue);cursor:pointer;user-select:none}
+  .ef-presets{display:flex;gap:6px;margin:6px 0 2px;flex-wrap:wrap}
+  .ef-presets button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 8px;
+    font-family:inherit;font-size:11.5px;cursor:pointer;color:var(--muted);white-space:nowrap}
+  .ef-presets button:hover{border-color:var(--blue);color:var(--blue)}
+  .toggle{display:flex;gap:6px;margin:8px 0 2px}
+  .toggle button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;
+    font-family:inherit;font-size:12.5px;cursor:pointer;color:var(--muted)}
+  .toggle button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .reset{margin-top:14px;width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;
+    padding:9px;font-family:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+  .reset:hover{background:#f0f3f8}
+  .headline{text-align:center;border-radius:12px;border:1px solid var(--line);background:var(--card);
+    padding:20px 16px;margin-bottom:14px}
+  .headline .lab{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .headline .val{font-size:34px;font-weight:700;margin:4px 0 2px;color:var(--co2)}
+  .headline .sub{font-size:13px;color:var(--muted)}
+  .caveat{background:#fff7ed;border:1px solid #f0d8b8;border-radius:10px;padding:11px 14px;
+    font-size:12.5px;color:#7a5320;margin-bottom:16px}
+  .caveat b{color:#5e3f18}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  @media(max-width:620px){.cards{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .card .v{font-size:23px;font-weight:700;margin:5px 0 2px}
+  .card .d{font-size:12.5px;color:var(--muted)}
+  .v.elec{color:var(--elec)} .v.gas{color:var(--gas)} .v.co2{color:var(--co2)}
+  .chartwrap h3{margin:0 0 8px;font-size:15px;font-weight:600}
+  .chartbox{position:relative;height:290px;width:100%}
+  footer{padding:16px 22px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line)}
   footer a{color:var(--blue)} .hl{color:var(--ink);font-weight:600}
+  .modal-bg{position:fixed;inset:0;background:rgba(15,25,45,.45);display:none;z-index:30;padding:20px;overflow:auto}
+  .modal-bg.open{display:flex} .modal{background:#fff;max-width:680px;margin:auto;border-radius:14px;padding:24px 26px}
+  .modal h2{color:var(--ink);text-transform:none;letter-spacing:0;font-size:20px;margin:4px 0 10px}
+  .modal h3{font-size:15px;margin:16px 0 6px} .modal p,.modal li{font-size:13.5px;line-height:1.6}
+  .modal .close{float:right;border:0;background:#eef3fb;border-radius:8px;padding:6px 13px;cursor:pointer;font-family:inherit}
+  .modal a{color:var(--blue)}
+  .disclaim{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic}
 </style>
 </head>
 <body>
 <header>
-  <div class="wrap">
-    <h1>Pathway to Zero Natural Gas &mdash; Los Alamos Electrification Tools</h1>
-    <p>Interactive results from a study of residential electrification in Los Alamos, NM: how the county's
-       energy use could change, what it means for a single home, and what households say programs are worth.</p>
+  <div>
+    <h1>Solar Adoption: Load &amp; Carbon Impact</h1>
+    <p>How rooftop solar adoption changes Los Alamos grid load, natural-gas use, and carbon emissions,
+       after accounting for the rebound effect. Set the number of adopters and the grid emission factor.</p>
+  </div>
+  <div class="nav">
+    <a href="index.html">&larr; All tools</a>
+    <button class="about-btn" id="aboutBtn">&#9432;&nbsp; About</button>
   </div>
 </header>
 
 <main>
-  <p class="intro">Pick a tool. Each one runs entirely in your browser, updates as you change the inputs,
-     and explains its assumptions. These are research tools for general information, not official utility tools.</p>
+  <aside class="panel controls">
+    <h2>1. Solar adopters</h2>
+    <p class="hint">How many households add rooftop solar.</p>
+    <div id="adoptBox"></div>
 
-  <div class="grid">
-    <a class="card" href="projection.html">
-      <div class="accent" style="background:#37618e"></div>
-      <div class="thumb"><canvas id="thumbProj"></canvas></div>
-      <div class="body">
-        <div class="tag">System-wide · 2025–2070</div>
-        <h2>County Energy Projection</h2>
-        <p>How Los Alamos County's residential electricity and natural gas use could evolve through 2070 under different electrification scenarios, with rooftop solar and 95% uncertainty bands.</p>
-        <div class="open">Open tool &rarr;</div>
-      </div>
-    </a>
-    <a class="card" href="house.html">
-      <div class="accent" style="background:#5a9e6f"></div>
-      <div class="thumb"><canvas id="thumbHouse"></canvas></div>
-      <div class="body">
-        <div class="tag">For a single household</div>
-        <h2>Home Electrification Calculator</h2>
-        <p>Estimate the change to your own home's electricity use, natural-gas use, and yearly energy bill from switching gas appliances to electric, with optional rooftop solar.</p>
-        <div class="open">Open tool &rarr;</div>
-      </div>
-    </a>
-    <a class="card" href="dce.html">
-      <div class="accent" style="background:#d98c3f"></div>
-      <div class="thumb"><canvas id="thumbDce"></canvas></div>
-      <div class="body">
-        <div class="tag">For program design</div>
-        <h2>Program Willingness to Pay</h2>
-        <p>What households say electrification-program features (carbon reduction, efficiency, rebates) are worth, from the choice-experiment survey. Adjust the program and the target population.</p>
-        <div class="open">Open tool &rarr;</div>
-      </div>
-    </a>
-    <a class="card" href="solar.html">
-      <div class="accent" style="background:#4a8db5"></div>
-      <div class="thumb"><canvas id="thumbSolar"></canvas></div>
-      <div class="body">
-        <div class="tag">Solar · emissions</div>
-        <h2>Solar Rebound &amp; Carbon</h2>
-        <p>How rooftop solar adoption changes grid load, natural-gas use, and carbon emissions, after the rebound effect. Enter the number of adopters and your grid emission factor.</p>
-        <div class="open">Open tool &rarr;</div>
-      </div>
-    </a>
-  </div>
+    <h2>2. Emission factor</h2>
+    <p class="hint">CO&#8322; per kWh of grid electricity avoided. Set your own, or pick a preset.</p>
+    <div class="ef-presets" id="efPresets">
+      <button data-ef="0.4487">PNM marginal 0.45</button>
+      <button data-ef="0.319">NM grid avg 0.32</button>
+      <button data-ef="0.0">Clean grid 0</button>
+    </div>
+    <div id="efBox"></div>
 
-  <div class="about">
-    <h3>About this project</h3>
-    <p>These tools accompany the working paper <em>Pathway to Zero Natural Gas</em>, on the path to ending
-       residential natural-gas use in Los Alamos. They turn the paper's main results &mdash; a
-       household-anchored load projection, the measured effect of switching each appliance, and a survey
-       choice experiment on willingness to pay &mdash; into calculators anyone can explore.</p>
-    <p><span class="hl">Cite as:</span> Yang, Y., Mamkhezri, J., Jawhari, A. A., Zhao, J., &amp; Cornelius, B.
-       (2026). <em>Pathway to Zero Natural Gas</em>. Working Paper, University of New Mexico.
-       &nbsp;&middot;&nbsp; <a href="https://github.com/UNM-EEL/ladpu">Code &amp; license on GitHub</a></p>
-  </div>
+    <details>
+      <summary>Advanced</summary>
+      <div class="toggle" id="gasToggle" style="margin-top:10px">
+        <button data-gas="1" class="on">Include gas effect</button>
+        <button data-gas="0">Electricity only</button>
+      </div>
+      <p class="hint" style="margin-top:8px">The gas reduction is spring-driven and statistically
+         fragile (the annual effect is not significant). Turn it off for an electricity-only estimate.</p>
+      <div id="gasEfBox"></div>
+    </details>
+
+    <button class="reset" id="reset">Restore defaults</button>
+  </aside>
+
+  <section>
+    <div class="headline">
+      <div class="lab">Estimated CO&#8322; reduction</div>
+      <div class="val" id="co2Val">&mdash;</div>
+      <div class="sub" id="co2Sub"></div>
+    </div>
+
+    <div class="caveat">
+      <b>The rebound effect shrinks the benefit.</b> Solar homes use about
+      <b id="cvRebound"></b> kWh/year <em>more</em> electricity after installing, so grid purchases fall
+      by only about 1,573 kWh/year per home &mdash; far below the roughly 6,900 kWh a system generates.
+      Realized carbon savings are a fraction of what a one-to-one offset would imply.
+    </div>
+
+    <div class="cards" id="cards"></div>
+
+    <div class="panel chartwrap">
+      <h3>Carbon reduction: realized vs. if solar fully offset the grid</h3>
+      <div class="chartbox"><canvas id="co2Chart"></canvas></div>
+    </div>
+    <p class="disclaim" id="disclaim"></p>
+  </section>
 </main>
 
 <footer>
-  &copy; 2024&ndash;2026 Yuting Yang and Jamal Mamkhezri. Licensed
-  <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>.
+  Estimates from the LADPU solar-rebound analysis (difference-in-differences). Grid load and gas use are
+  per-home treatment effects; carbon uses a marginal grid emission factor and natural-gas combustion.
+  <br>This is a research tool for general information only, not an official LADPU tool.
   <br>Funded by the Los Alamos Department of Public Utilities and the New Mexico Legislature
   (UNM Research and Public Service Project, SB&nbsp;377; and SB&nbsp;0192). Results are based on the
   authors' own analysis and do not necessarily reflect the views of the Los Alamos Department of
   Public Utilities. &nbsp;|&nbsp; <a href="https://github.com/UNM-EEL">UNM Energy Econ Lab</a>
 </footer>
 
+<div class="modal-bg" id="aboutModal">
+  <div class="modal">
+    <button class="close" id="aboutClose">Close &times;</button>
+    <h2>About these estimates</h2>
+    <p>Using metered data and a difference-in-differences design (Callaway &amp; Sant'Anna, with
+       never-adopters as the control group), the study measures how rooftop solar changes a household's
+       grid electricity, total electricity, and natural-gas use. This tool scales those per-home effects
+       to any number of adopters and prices the avoided electricity as carbon.</p>
+
+    <h3>The rebound effect</h3>
+    <p>After installing solar, households <em>increase</em> total electricity use by about
+       <b id="abRebound"></b> kWh/year (largest in winter). So grid purchases fall by only about
+       <b id="abGrid"></b> kWh/year per home &mdash; well below the roughly <b id="abGen"></b> kWh a
+       typical system generates. The difference is the rebound plus exported power. Because of this, the
+       realized carbon reduction is much smaller than a simple "generation times emission factor" would suggest.</p>
+
+    <h3>Carbon</h3>
+    <p>Avoided grid electricity is converted to CO&#8322; with a <b>marginal emission factor</b> &mdash;
+       the emissions of the power plants that actually adjust output, following the regional grid's
+       dispatch. The default is about <b id="abEf"></b> kg CO&#8322;/kWh (PNM merit-order). The New Mexico
+       grid <em>average</em> is lower (0.319 kg/kWh); a coal-heavy grid would be much higher. Set the
+       factor for your grid. Natural gas is valued at 52.91 kg CO&#8322;/MMBtu (5.291 kg/therm).</p>
+
+    <h3>Limits</h3>
+    <p>The grid effect is precisely estimated but the confidence interval is wide; winter is actually a
+       small load <em>increase</em>. The gas reduction is spring-driven and not statistically significant
+       over the year, so it is optional here. The load figure is net grid purchases avoided, not gross
+       generation. Results are for the Los Alamos / PNM grid and an affluent, high-altitude community with
+       about 5.7% solar penetration, and may not generalize.</p>
+    <p>Full methodology is in the LADPU solar-rebound study.
+       <a href="https://github.com/UNM-EEL">UNM Energy Econ Lab on GitHub &rarr;</a></p>
+  </div>
+</div>
+
 <script>
-const T = {"proj":{"years":[2025,2030,2040,2050,2060,2070],"load":[63041,66126,73350,81054,90490,100560]},"house":[543,-860,-317],"dce":[61,89,71],"solar":[351,1549]};
-// static preview charts: no interaction, so clicks pass through to the card link
-const baseOpts = {responsive:true, maintainAspectRatio:false, animation:false, events:[],
-  plugins:{legend:{display:false}, tooltip:{enabled:false}}};
-function mkLine(id, labels, data, color){
-  if(typeof Chart==="undefined") return;
-  new Chart(document.getElementById(id), {type:"line",
-    data:{labels, datasets:[{data, borderColor:color, backgroundColor:color+"22", borderWidth:2.4,
-      pointRadius:0, tension:.3, fill:true}]},
-    options:Object.assign({}, baseOpts, {scales:{
-      x:{grid:{display:false}, ticks:{color:"#9aa7b4", font:{size:10}, maxTicksLimit:4}},
-      y:{grid:{color:"#eef1f5"}, ticks:{color:"#9aa7b4", font:{size:10}, maxTicksLimit:4,
-         callback:v=>(v/1000).toFixed(0)+"k"}}}})});
+const D = {"grid_kwh":1573,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_default":497,"n_meters":8646,"co2_home_report":977.9};
+const fmt = n => Math.round(n).toLocaleString();
+const fmt1 = n => (Math.round(n*10)/10).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:1});
+
+function defaults(){ return {n:D.n_default, ef_elec:D.ef_elec, ef_gas:D.ef_gas, gas:1}; }
+let s = defaults();
+
+function compute(){
+  const n = s.n;
+  const loadMWh = n * D.grid_kwh / 1000;
+  const gasTherms = n * D.gas_therms;
+  const co2_elec = n * D.grid_kwh * s.ef_elec;            // kg/yr
+  const co2_gas = s.gas ? n * D.gas_therms * s.ef_gas : 0; // kg/yr
+  const co2_t = (co2_elec + co2_gas) / 1000;             // metric tons/yr
+  const realized_elec_t = co2_elec / 1000;
+  const theo_elec_t = n * D.gross_gen * s.ef_elec / 1000; // if solar fully offset grid (no rebound/export)
+  return {n, loadMWh, gasTherms, co2_elec, co2_gas, co2_t, realized_elec_t, theo_elec_t};
 }
-function mkBars(id, labels, data, colors, unit){
-  if(typeof Chart==="undefined") return;
-  new Chart(document.getElementById(id), {type:"bar",
-    data:{labels, datasets:[{data, backgroundColor:colors, borderRadius:4, borderWidth:0, maxBarThickness:42}]},
-    options:Object.assign({}, baseOpts, {scales:{
-      x:{grid:{display:false}, ticks:{color:"#9aa7b4", font:{size:10}}},
-      y:{grid:{color:"#eef1f5"}, ticks:{color:"#9aa7b4", font:{size:10}, maxTicksLimit:4,
-         callback:v=>unit+Math.abs(v)}}}})});
+
+let co2Chart;
+function render(){
+  const c = compute();
+  document.getElementById("co2Val").textContent = "≈ " + fmt(c.co2_t) + " t CO₂ / year";
+  document.getElementById("co2Sub").textContent =
+    "for " + fmt(c.n) + " solar homes (" + fmt1(c.n/D.n_meters*100) + "% of meters)"
+    + " · about " + fmt(c.co2_t/c.n*1000) + " kg per home";
+
+  document.getElementById("cards").innerHTML = [
+    `<div class="card"><div class="k">Electricity load</div><div class="v elec">−${fmt(c.loadMWh)} MWh</div><div class="d">grid purchases avoided / yr</div></div>`,
+    `<div class="card"><div class="k">Natural gas</div><div class="v gas">${s.gas?"−"+fmt(c.gasTherms)+" therms":"—"}</div><div class="d">${s.gas?"reduced / yr (spring-driven)":"gas effect off"}</div></div>`,
+    `<div class="card"><div class="k">CO₂ avoided</div><div class="v co2">${fmt(c.co2_t)} t</div><div class="d">per year · realized, after rebound</div></div>`,
+  ].join("");
+
+  document.getElementById("disclaim").textContent =
+    "Realized carbon reduction (" + fmt(c.realized_elec_t) + " t from electricity) is about "
+    + Math.round(c.realized_elec_t/c.theo_elec_t*100) + "% of the "
+    + fmt(c.theo_elec_t) + " t a one-to-one grid offset would give; the rest is lost to the rebound and exports.";
+
+  if(co2Chart){
+    co2Chart.data.labels = ["Realized\n(after rebound)", "If 1:1 grid offset\n(no rebound)"];
+    co2Chart.data.datasets = [{data:[c.realized_elec_t, c.theo_elec_t],
+      backgroundColor:["#5a9e6f","#c7d2dd"], borderRadius:5, borderWidth:0, maxBarThickness:90}];
+    co2Chart.update();
+  }
 }
-mkLine("thumbProj", T.proj.years, T.proj.load, "#37618e");
-mkBars("thumbHouse", ["Electricity","Gas","Net"], T.house, ["#37618e","#d98c3f", T.house[2]<0?"#5a9e6f":"#b5553f"], "$");
-mkBars("thumbDce", ["Carbon","Efficiency","Rebate"], T.dce, ["#5a9e6f","#37618e","#d98c3f"], "$");
-mkBars("thumbSolar", ["Realized","If 1:1"], T.solar, ["#5a9e6f","#c7d2dd"], "");
+
+// ---- controls ----
+function slider(box, label, min, max, step, get, set, fmtv, lvl){
+  const wrap=document.createElement("div"); wrap.className="ctl";
+  wrap.innerHTML=`<label>${label} <b></b></label><input type="range" min="${min}" max="${max}" step="${step}">
+    ${lvl?`<div class="lvl" data-lvl></div>`:""}`;
+  box.appendChild(wrap);
+  const inp=wrap.querySelector("input"), out=wrap.querySelector("b"), lv=wrap.querySelector("[data-lvl]");
+  const show=()=>{ out.textContent=fmtv(get()); if(lv) lv.textContent=lvl(get()); };
+  inp.value=get(); show();
+  inp.addEventListener("input",()=>{ set(parseFloat(inp.value)); show(); render(); });
+}
+function numRow(box, label, unit, get, set, step){
+  const r=document.createElement("div"); r.className="num";
+  r.innerHTML=`<label>${label}</label><span><input type="number" step="${step}"><span class="u"> ${unit}</span></span>`;
+  box.appendChild(r);
+  const inp=r.querySelector("input"); inp.value=get();
+  inp.addEventListener("input",()=>{ const v=parseFloat(inp.value); if(!isNaN(v)){set(v); render();} });
+  return inp;
+}
+let efInput;
+function buildControls(){
+  const ab=document.getElementById("adoptBox"); ab.innerHTML="";
+  slider(ab,"Households adopting solar",0,D.n_meters,50,()=>s.n,v=>s.n=v,
+    v=>fmt(v)+" homes", v=>(v/D.n_meters*100).toFixed(1)+"% of meters · today ≈ "+fmt(D.n_default));
+  const eb=document.getElementById("efBox"); eb.innerHTML="";
+  efInput = numRow(eb,"Grid emission factor","kg CO₂/kWh",()=>s.ef_elec,v=>s.ef_elec=v,0.01);
+  const gb=document.getElementById("gasEfBox"); gb.innerHTML="";
+  numRow(gb,"Gas emission factor","kg CO₂/therm",()=>s.ef_gas,v=>s.ef_gas=v,0.1);
+}
+
+document.querySelectorAll("#efPresets button").forEach(b=>b.addEventListener("click",()=>{
+  s.ef_elec=parseFloat(b.dataset.ef); if(efInput) efInput.value=s.ef_elec; render();
+}));
+document.querySelectorAll("#gasToggle button").forEach(b=>b.addEventListener("click",()=>{
+  s.gas=parseInt(b.dataset.gas); document.querySelectorAll("#gasToggle button").forEach(x=>x.classList.toggle("on",x===b));
+  render();
+}));
+document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
+  document.querySelectorAll("#gasToggle button").forEach(x=>x.classList.toggle("on",x.dataset.gas==="1"));
+  buildControls(); render(); });
+
+// about + caveat numbers
+(function(){
+  document.getElementById("cvRebound").textContent = fmt(D.rebound_kwh);
+  document.getElementById("abRebound").textContent = fmt(D.rebound_kwh);
+  document.getElementById("abGrid").textContent = fmt(D.grid_kwh);
+  document.getElementById("abGen").textContent = fmt(D.gross_gen);
+  document.getElementById("abEf").textContent = D.ef_elec;
+})();
+const modal=document.getElementById("aboutModal");
+document.getElementById("aboutBtn").addEventListener("click",()=>modal.classList.add("open"));
+document.getElementById("aboutClose").addEventListener("click",()=>modal.classList.remove("open"));
+modal.addEventListener("click",e=>{ if(e.target===modal) modal.classList.remove("open"); });
+
+// init
+buildControls();
+if(typeof Chart !== "undefined"){
+  co2Chart = new Chart(document.getElementById("co2Chart"), {
+    type:"bar", data:{labels:[],datasets:[]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>Math.round(c.raw).toLocaleString()+" t CO₂/yr"}}},
+      scales:{x:{grid:{display:false},ticks:{color:"#5b6776",font:{size:11},autoSkip:false,
+                 callback:function(v){return this.getLabelForValue(v).split("\n");}}},
+              y:{grid:{color:"#eef1f5"},ticks:{color:"#5b6776",callback:v=>v.toLocaleString()},
+                 title:{display:true,text:"metric tons CO₂ / year",color:"#5b6776"}}}}
+  });
+}
+render();
 </script>
 </body>
 </html>
