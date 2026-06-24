@@ -130,7 +130,14 @@
     <p class="hint">Check what runs on natural gas today, then check the box on the right to switch it to electric.</p>
     <div id="appList"></div>
 
-    <h2>2. Add rooftop solar?</h2>
+    <h2>2. Where is your home?</h2>
+    <div class="toggle" id="locToggle">
+      <button data-loc="los_alamos" class="on">Los Alamos townsite</button>
+      <button data-loc="white_rock">White Rock</button>
+    </div>
+    <p class="hint">Your gas bill reads in CCF; your area sets how CCF converts to energy.</p>
+
+    <h2>3. Add rooftop solar?</h2>
     <label class="solar"><input type="checkbox" id="solar">
       <span class="nm">Install rooftop solar panels</span><span class="sw">typical home</span></label>
 
@@ -198,6 +205,12 @@
        year for a typical Los Alamos system (the measured average), valued at the off-peak rate because
        panels generate mostly midday. You can change this figure.</p>
 
+    <h3>Reading your gas in CCF</h3>
+    <p>Your gas meter and bill are in CCF (hundred cubic feet), so you enter usage in CCF here. The tool
+       converts CCF to energy (therms) behind the scenes with a factor that depends on elevation: about
+       <b id="aboutTpcLA"></b> therms per CCF in the Los Alamos townsite and <b id="aboutTpcWR"></b> therms
+       per CCF in White Rock. Pick your area so the conversion matches your bill.</p>
+
     <h3>Rates</h3>
     <p>LADPU is moving to <b>time-of-use</b> pricing: electricity costs more during peak hours and less
        off-peak. New heating and water-heating load is split between peak and off-peak using the
@@ -215,7 +228,7 @@
 </div>
 
 <script>
-const D = {"KWH":{"space":1131,"water":1561,"cooking":537,"dryer":521},"THERMS":{"space":621.2,"water":170.7,"cooking":58.7,"dryer":57.0},"SOLAR_KWH":1573,"RATES":{"tou_peak":0.197,"tou_off":0.11,"peak_share":0.4,"flat":0.15,"gas_therm":0.77,"gas_service":13.45}};
+const D = {"KWH":{"space":1131,"water":1561,"cooking":537,"dryer":521},"THERMS":{"space":621.2,"water":170.7,"cooking":58.7,"dryer":57.0},"CCF":{"space":773,"water":212,"cooking":73,"dryer":71},"ELEV":{"los_alamos":0.78,"white_rock":0.81},"HEAT":1.03,"SOLAR_KWH":1573,"RATES":{"tou_peak":0.197,"tou_off":0.11,"peak_share":0.4,"flat":0.15,"gas_therm":0.77,"gas_service":13.45}};
 const EU = ["space","water","cooking","dryer"];
 const LBL = {space:"Space heating", water:"Water heater", cooking:"Cooking range", dryer:"Clothes dryer"};
 const fmt = n => Math.round(n).toLocaleString();
@@ -225,22 +238,25 @@ function defaults(){
   return {
     have: {space:true, water:true, cooking:true, dryer:true},   // typical gas home
     sw:   {space:true, water:true, cooking:true, dryer:true},
-    solar:false, rate:"tou",
-    kwh: Object.assign({}, D.KWH), therms: Object.assign({}, D.THERMS), solar_kwh: D.SOLAR_KWH,
+    solar:false, rate:"tou", loc:"los_alamos",
+    kwh: Object.assign({}, D.KWH), ccf: Object.assign({}, D.CCF), solar_kwh: D.SOLAR_KWH,
     R: Object.assign({}, D.RATES),
   };
 }
+const tpc = loc => D.ELEV[loc]*D.HEAT;     // therms per CCF, by service area
 let s = defaults();
 
 // ---- model ----
 function compute(){
-  let addKwh=0, savedTherms=0;
+  const t = tpc(s.loc);
+  let addKwh=0, savedTherms=0, savedCcf=0;
   EU.forEach(k=>{
     if(s.have[k] && s.sw[k]){
-      // space-heat electricity scales with the home's heating gas; appliance deltas are flat
-      const scale = (k==="space") ? (s.therms.space / D.THERMS.space) : 1;
+      const th = s.ccf[k]*t;                                   // CCF on the bill -> therms of energy
+      // space-heat electricity scales with the home's heating energy; appliance deltas are flat
+      const scale = (k==="space") ? (th / D.THERMS.space) : 1;
       addKwh += s.kwh[k]*scale;
-      savedTherms += s.therms[k];
+      savedTherms += th; savedCcf += s.ccf[k];
     }
   });
   const solarKwh = s.solar ? s.solar_kwh : 0;
@@ -254,7 +270,7 @@ function compute(){
   const allSwitched = ownGas.length>0 && ownGas.every(k=>s.sw[k]);
   const serviceSave = allSwitched ? s.R.gas_service*12 : 0;
   const net = addElecCost - gasSave - serviceSave - solarSave;   // >0 bill up, <0 saving
-  return {addKwh, savedTherms, solarKwh, addElecCost, gasSave, serviceSave, solarSave, net, allSwitched};
+  return {addKwh, savedTherms, savedCcf, solarKwh, addElecCost, gasSave, serviceSave, solarSave, net, allSwitched};
 }
 
 // ---- render ----
@@ -271,7 +287,7 @@ function render(){
 
   document.getElementById("cards").innerHTML = [
     `<div class="card"><div class="k">Electricity</div><div class="v elec">+${fmt(c.addKwh)} kWh</div><div class="d">more per year &middot; +${money(c.addElecCost)}/yr</div></div>`,
-    `<div class="card"><div class="k">Natural gas</div><div class="v gas">−${fmt(c.savedTherms)} therms</div><div class="d">saved per year &middot; −${money(c.gasSave+c.serviceSave)}/yr</div></div>`,
+    `<div class="card"><div class="k">Natural gas</div><div class="v gas">−${fmt(c.savedCcf)} CCF</div><div class="d">saved per year (≈ ${fmt(c.savedTherms)} therms) &middot; −${money(c.gasSave+c.serviceSave)}/yr</div></div>`,
     c.solarKwh>0
       ? `<div class="card"><div class="k">Rooftop solar</div><div class="v sun">−${fmt(c.solarKwh)} kWh</div><div class="d">from the grid &middot; −${money(c.solarSave)}/yr</div></div>`
       : `<div class="card"><div class="k">Rooftop solar</div><div class="v">&mdash;</div><div class="d">not included</div></div>`,
@@ -319,7 +335,7 @@ function numRow(box, label, unit, get, set, step){
 }
 function buildUsage(){
   const box=document.getElementById("usageBox"); box.innerHTML="";
-  EU.forEach(k=>numRow(box, LBL[k]+" gas", "therms/yr", ()=>s.therms[k], v=>s.therms[k]=v, 1));
+  EU.forEach(k=>numRow(box, LBL[k]+" gas", "CCF/yr", ()=>s.ccf[k], v=>s.ccf[k]=v, 1));
   numRow(box, "Solar grid offset", "kWh/yr", ()=>s.solar_kwh, v=>s.solar_kwh=v, 50);
 }
 function buildRates(){
@@ -336,12 +352,17 @@ function buildRates(){
 }
 
 document.getElementById("solar").addEventListener("change",e=>{ s.solar=e.target.checked; render(); });
+document.querySelectorAll("#locToggle button").forEach(b=>b.addEventListener("click",()=>{
+  s.loc=b.dataset.loc; document.querySelectorAll("#locToggle button").forEach(x=>x.classList.toggle("on",x===b));
+  render();
+}));
 document.querySelectorAll("#rateToggle button").forEach(b=>b.addEventListener("click",()=>{
   s.rate=b.dataset.rate; document.querySelectorAll("#rateToggle button").forEach(x=>x.classList.toggle("on",x===b));
   buildRates(); render();
 }));
 document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
   document.getElementById("solar").checked=false;
+  document.querySelectorAll("#locToggle button").forEach(x=>x.classList.toggle("on",x.dataset.loc==="los_alamos"));
   document.querySelectorAll("#rateToggle button").forEach(x=>x.classList.toggle("on",x.dataset.rate==="tou"));
   buildApps(); buildUsage(); buildRates(); render(); });
 
@@ -350,6 +371,8 @@ document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
   const ul=document.getElementById("aboutApp");
   ul.innerHTML = EU.map(k=>`<li><b>${LBL[k]}:</b> +${fmt(D.KWH[k])} kWh/yr electricity, −${fmt(D.THERMS[k])} therms/yr gas.</li>`).join("");
   document.getElementById("aboutSolar").textContent = fmt(D.SOLAR_KWH);
+  document.getElementById("aboutTpcLA").textContent = (D.ELEV.los_alamos*D.HEAT).toFixed(2);
+  document.getElementById("aboutTpcWR").textContent = (D.ELEV.white_rock*D.HEAT).toFixed(2);
 })();
 const modal=document.getElementById("aboutModal");
 document.getElementById("aboutBtn").addEventListener("click",()=>modal.classList.add("open"));
