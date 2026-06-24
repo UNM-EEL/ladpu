@@ -3,17 +3,22 @@
 Interactive tools from the working paper *Pathway to Zero Natural Gas*, on residential
 electrification in Los Alamos, NM.
 
-- **County-wide projection** — [unm-eel.github.io/ladpu](https://unm-eel.github.io/ladpu/)
-  (`index.html`): how much electricity and natural gas Los Alamos homes would use through 2070
-  as households replace gas appliances with electric ones, under three scenarios with solar.
-- **Household calculator** — [unm-eel.github.io/ladpu/house.html](https://unm-eel.github.io/ladpu/house.html)
-  (`house.html`): a "should I switch?" tool for a single home — pick your gas appliances, choose
-  what to electrify, optionally add rooftop solar, and see the change to your electricity use,
-  gas use, and annual bill under the current LADPU rates.
+The landing page at [unm-eel.github.io/ladpu](https://unm-eel.github.io/ladpu/) (`index.html`) links to
+three interactive tools:
 
-Both pages are fully self-contained (Chart.js and all model data are embedded), so they need
-no build step, no server, and no internet connection. Served via GitHub Pages from the repo root;
-the host `unm-eel.github.io` is left free for the lab's main page.
+- **County energy projection** (`projection.html`): how much electricity and natural gas Los Alamos
+  County homes would use through 2070 as households replace gas appliances with electric ones, under
+  three scenarios with rooftop solar and 95% uncertainty bands.
+- **Home electrification calculator** (`house.html`): a "should I switch?" tool for a single home —
+  pick your gas appliances, choose what to electrify, optionally add rooftop solar, and see the change
+  to your electricity use, gas use, and yearly energy bill under current LADPU rates.
+- **Program willingness to pay** (`dce.html`): a utility-facing tool from the discrete choice experiment —
+  set a program's carbon-reduction, efficiency, and rebate levels and the target population, and see the
+  predicted average household stated willingness to pay.
+
+Every page is fully self-contained (Chart.js and all numbers are embedded), so they need no build step,
+no server, and no internet connection. Served via GitHub Pages from the repo root; the host
+`unm-eel.github.io` is left free for the lab's main page.
 
 ## License
 
