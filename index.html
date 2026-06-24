@@ -46,8 +46,8 @@
   .grid2>*{min-width:0}
   @media(max-width:920px){
     main{grid-template-columns:1fr}
-    main>section{order:1}        /* charts and cards first on narrow screens */
-    .controls{order:2}
+    .controls{order:1}          /* scenario controls first on narrow screens */
+    main>section{order:2}
   }
   @media(max-width:600px){
     header{padding:15px 16px}
