@@ -116,7 +116,7 @@
 <header>
   <div>
     <h1>Should I Switch? &mdash; Home Electrification Calculator</h1>
-    <p>Estimate what happens to your electricity use, your natural-gas use, and your yearly bill if you
+    <p>Estimate what happens to your electricity use, your natural-gas use, and your yearly energy bill if you
        replace gas appliances with electric ones. Pick what you have, choose what to switch, and the
        numbers update instantly. All rates are editable.</p>
   </div>
@@ -164,7 +164,7 @@
   <section>
     <div class="headline">
       <div class="big">
-        <div class="lab">Estimated change to your yearly bill</div>
+        <div class="lab">Estimated change to your yearly energy bill</div>
         <div class="val" id="netVal">&mdash;</div>
         <div class="sub" id="netSub"></div>
       </div>
@@ -173,7 +173,7 @@
     <div class="cards" id="cards"></div>
 
     <div class="panel chartwrap">
-      <h3>Estimated change to your annual bill (at current rates)</h3>
+      <h3>Estimated change to your annual energy bill (at current rates)</h3>
       <div class="chartbox"><canvas id="billChart"></canvas></div>
     </div>
     <p class="disclaim" id="disclaim"></p>
@@ -309,9 +309,10 @@ function render(){
   ].join("");
 
   const dl = document.getElementById("disclaim");
+  const svcYr = money(s.R.gas_service*12);
   dl.textContent = c.allSwitched
-    ? "All gas appliances switched: the fixed monthly gas service charge is removed (you could disconnect gas)."
-    : "Some gas appliances remain, so the gas service charge still applies.";
+    ? "You switched every gas appliance, so the fixed gas service charge ("+svcYr+"/yr) is removed — you could disconnect gas entirely. That avoided charge is a large part of the saving."
+    : "You still have gas appliances, so you keep paying the gas service charge ("+svcYr+"/yr). Electrifying just one appliance can raise your bill; the bigger savings come from going all-electric and dropping gas service.";
 
   // bar chart: cost components (added electric up; gas, service, solar down) and the net
   const labels = ["Electricity\nadded","Gas\nsaved","Gas service\nsaved","Solar\nsaved","Net\nchange"];
