@@ -25,7 +25,7 @@ no server, and no internet connection. Served via GitHub Pages from the repo roo
 
 ## License
 
-© 2024–2026 Yuting Yang and Jamal Mamkhezri.
+© 2026 Yuting Yang and Jamal Mamkhezri.
 
 This work is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
 International (CC BY-NC-ND 4.0)](https://creativecommons.org/licenses/by-nc-nd/4.0/). You may
