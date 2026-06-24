@@ -201,12 +201,13 @@
        added electricity already reflects that efficiency, not plain resistance heating.</p>
 
     <h3>Rooftop solar (net billing)</h3>
-    <p>Adding solar lowers the electricity you buy from the grid by about <b id="aboutSolar"></b> kWh per
-       year for a typical Los Alamos system (the measured average). LADPU uses <em>net billing</em>: the
-       solar you use in your own home offsets power at the off-peak retail rate, while the excess you
-       export to the grid is credited at the lower wholesale rate (about $<b id="aboutWhole"></b>/kWh).
-       The tool values the offset as that blend; set the self-consumed share and the wholesale rate to
-       match your system.</p>
+    <p>A typical Los Alamos rooftop system is about <b id="aboutKw"></b> kW and generates roughly
+       <b id="aboutSolar"></b> kWh per year (the local solar resource is about
+       <b id="aboutYield"></b> kWh per kW). This is the panels' theoretical output, not a system-wide
+       average. LADPU uses <em>net billing</em>: the solar you use in your own home offsets power at the
+       off-peak retail rate, while the excess you export is credited at the lower wholesale rate (about
+       $<b id="aboutWhole"></b>/kWh). The tool values your generation as that blend; set your system size,
+       self-consumed share, and the wholesale rate under the inputs.</p>
 
     <h3>Reading your gas in CCF</h3>
     <p>Your gas meter and bill are in CCF (hundred cubic feet), so you enter usage in CCF here. The tool
@@ -231,7 +232,7 @@
 </div>
 
 <script>
-const D = {"KWH":{"space":1131,"water":1561,"cooking":537,"dryer":521},"THERMS":{"space":621.2,"water":170.7,"cooking":58.7,"dryer":57.0},"CCF":{"space":773,"water":212,"cooking":73,"dryer":71},"ELEV":{"los_alamos":0.78,"white_rock":0.81},"HEAT":1.03,"SOLAR_KWH":1573,"RATES":{"tou_peak":0.197,"tou_off":0.11,"peak_share":0.4,"flat":0.15,"gas_therm":0.77,"gas_service":13.45,"wholesale":0.06,"solar_self":0.5}};
+const D = {"KWH":{"space":1131,"water":1561,"cooking":537,"dryer":521},"THERMS":{"space":621.2,"water":170.7,"cooking":58.7,"dryer":57.0},"CCF":{"space":773,"water":212,"cooking":73,"dryer":71},"ELEV":{"los_alamos":0.78,"white_rock":0.81},"HEAT":1.03,"SYS_KW":5.3,"SPEC_YIELD":1700,"RATES":{"tou_peak":0.197,"tou_off":0.11,"peak_share":0.4,"flat":0.15,"gas_therm":0.77,"gas_service":13.45,"wholesale":0.06,"solar_self":0.4}};
 const EU = ["space","water","cooking","dryer"];
 const LBL = {space:"Space heating", water:"Water heater", cooking:"Cooking range", dryer:"Clothes dryer"};
 const fmt = n => Math.round(n).toLocaleString();
@@ -242,7 +243,7 @@ function defaults(){
     have: {space:true, water:true, cooking:true, dryer:true},   // typical gas home
     sw:   {space:true, water:true, cooking:true, dryer:true},
     solar:false, rate:"tou", loc:"los_alamos",
-    kwh: Object.assign({}, D.KWH), ccf: Object.assign({}, D.CCF), solar_kwh: D.SOLAR_KWH,
+    kwh: Object.assign({}, D.KWH), ccf: Object.assign({}, D.CCF), sys_kw: D.SYS_KW,
     R: Object.assign({}, D.RATES),
   };
 }
@@ -262,7 +263,7 @@ function compute(){
       savedTherms += th; savedCcf += s.ccf[k];
     }
   });
-  const solarKwh = s.solar ? s.solar_kwh : 0;
+  const solarKwh = s.solar ? s.sys_kw*D.SPEC_YIELD : 0;   // theoretical generation = size x yield
   const eAdd = s.rate==="tou" ? (s.R.peak_share*s.R.tou_peak + (1-s.R.peak_share)*s.R.tou_off) : s.R.flat;
   // net billing: self-consumed solar offsets retail (off-peak/flat); exports credited at wholesale
   const eRetail = s.rate==="tou" ? s.R.tou_off : s.R.flat;
@@ -294,7 +295,7 @@ function render(){
     `<div class="card"><div class="k">Electricity</div><div class="v elec">+${fmt(c.addKwh)} kWh</div><div class="d">more per year &middot; +${money(c.addElecCost)}/yr</div></div>`,
     `<div class="card"><div class="k">Natural gas</div><div class="v gas">−${fmt(c.savedCcf)} CCF</div><div class="d">saved per year (≈ ${fmt(c.savedTherms)} therms) &middot; −${money(c.gasSave+c.serviceSave)}/yr</div></div>`,
     c.solarKwh>0
-      ? `<div class="card"><div class="k">Rooftop solar</div><div class="v sun">−${fmt(c.solarKwh)} kWh</div><div class="d">from the grid &middot; −${money(c.solarSave)}/yr</div></div>`
+      ? `<div class="card"><div class="k">Rooftop solar</div><div class="v sun">${fmt(c.solarKwh)} kWh</div><div class="d">generated/yr &middot; worth −${money(c.solarSave)}/yr</div></div>`
       : `<div class="card"><div class="k">Rooftop solar</div><div class="v">&mdash;</div><div class="d">not included</div></div>`,
   ].join("");
 
@@ -341,7 +342,7 @@ function numRow(box, label, unit, get, set, step){
 function buildUsage(){
   const box=document.getElementById("usageBox"); box.innerHTML="";
   EU.forEach(k=>numRow(box, LBL[k]+" gas", "CCF/yr", ()=>s.ccf[k], v=>s.ccf[k]=v, 1));
-  numRow(box, "Solar grid offset", "kWh/yr", ()=>s.solar_kwh, v=>s.solar_kwh=v, 50);
+  numRow(box, "Solar system size", "kW", ()=>s.sys_kw, v=>s.sys_kw=v, 0.5);
 }
 function buildRates(){
   const box=document.getElementById("rateBox"); box.innerHTML="";
@@ -377,7 +378,9 @@ document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
 (function(){
   const ul=document.getElementById("aboutApp");
   ul.innerHTML = EU.map(k=>`<li><b>${LBL[k]}:</b> +${fmt(D.KWH[k])} kWh/yr electricity, −${fmt(D.THERMS[k])} therms/yr gas.</li>`).join("");
-  document.getElementById("aboutSolar").textContent = fmt(D.SOLAR_KWH);
+  document.getElementById("aboutSolar").textContent = fmt(D.SYS_KW*D.SPEC_YIELD);
+  document.getElementById("aboutKw").textContent = D.SYS_KW;
+  document.getElementById("aboutYield").textContent = fmt(D.SPEC_YIELD);
   document.getElementById("aboutWhole").textContent = D.RATES.wholesale.toFixed(2);
   document.getElementById("aboutTpcLA").textContent = (D.ELEV.los_alamos*D.HEAT).toFixed(2);
   document.getElementById("aboutTpcWR").textContent = (D.ELEV.white_rock*D.HEAT).toFixed(2);
