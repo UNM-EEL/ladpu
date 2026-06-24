@@ -176,6 +176,14 @@
       <div class="chartbox"><canvas id="co2Chart"></canvas></div>
     </div>
     <p class="disclaim" id="disclaim"></p>
+
+    <div class="panel chartwrap" style="margin-top:16px">
+      <h3>Effect on electricity by season &mdash; the rebound</h3>
+      <div class="chartbox"><canvas id="seasonChart"></canvas></div>
+      <p class="disclaim">In winter, solar output is low but households use much more electricity (the
+        rebound), so grid purchases actually rise. The grid savings come in summer and fall. Bars are
+        the change for the chosen number of adopters; below zero means a reduction.</p>
+    </div>
   </section>
 </main>
 
@@ -214,6 +222,13 @@
        factor on the same kWh (about 706 kg). You can switch to a single flat factor for another grid
        &mdash; the New Mexico grid <em>average</em> is lower (0.319 kg/kWh), a coal-heavy grid much higher.
        Natural gas is valued at 52.91 kg CO&#8322;/MMBtu (5.291 kg/therm).</p>
+    <p><b>Emission-factor sources.</b> The hour-by-season marginal factors are computed by the authors
+       from the PNM grid generation mix under merit-order dispatch (the emission intensity of the marginal
+       generator at each hour). The New Mexico grid <em>average</em> (0.319 kg/kWh, 703.7 lb/MWh) is from
+       the <a href="https://www.epa.gov/egrid/power-profiler#/AZNM" target="_blank" rel="noopener">EPA
+       eGRID Power Profiler</a> (AZNM subregion); the natural-gas factor (52.91 kg CO&#8322;/MMBtu) is from
+       the <a href="https://www.eia.gov/environment/emissions/co2_vol_mass.php" target="_blank" rel="noopener">U.S.
+       Energy Information Administration</a>.</p>
 
     <h3>Limits</h3>
     <p>The grid effect is precisely estimated but the confidence interval is wide; winter is actually a
@@ -227,7 +242,7 @@
 </div>
 
 <script>
-const D = {"grid_kwh":1573,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_default":497,"n_meters":8646,"co2_elec_hs":899.87,"co2_gas_hs":78.04,"co2_theo_hs":3915.17};
+const D = {"grid_kwh":1573,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_default":497,"n_meters":8646,"seasons":["Spring","Summer","Fall","Winter"],"att_total_mo":[175.249,-44.947,-129.493,458.764],"att_grid_mo":[-102.309,-252.238,-333.309,152.401],"co2_elec_hs":899.87,"co2_gas_hs":78.04,"co2_theo_hs":3915.17};
 const fmt = n => Math.round(n).toLocaleString();
 const fmt1 = n => (Math.round(n*10)/10).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:1});
 
@@ -250,7 +265,7 @@ function compute(){
           realized_elec_t: co2_elec/1000, theo_elec_t: theo_elec/1000};
 }
 
-let co2Chart;
+let co2Chart, seasonChart;
 function render(){
   const c = compute();
   document.getElementById("co2Val").textContent = "≈ " + fmt(c.co2_t) + " t CO₂ / year";
@@ -274,6 +289,16 @@ function render(){
     co2Chart.data.datasets = [{data:[c.realized_elec_t, c.theo_elec_t],
       backgroundColor:["#5a9e6f","#c7d2dd"], borderRadius:5, borderWidth:0, maxBarThickness:90}];
     co2Chart.update();
+  }
+  if(seasonChart){
+    const st = D.att_total_mo.map(v=>v*3*c.n/1000);   // total household use, MWh/yr by season
+    const sg = D.att_grid_mo.map(v=>v*3*c.n/1000);    // grid purchases, MWh/yr by season
+    seasonChart.data.labels = D.seasons;
+    seasonChart.data.datasets = [
+      {label:"Total household use", data:st, backgroundColor:"#d98c3f", borderRadius:4, maxBarThickness:40},
+      {label:"Grid purchases (utility supplies)", data:sg, backgroundColor:"#37618e", borderRadius:4, maxBarThickness:40},
+    ];
+    seasonChart.update();
   }
 }
 
@@ -351,6 +376,15 @@ if(typeof Chart !== "undefined"){
                  callback:function(v){return this.getLabelForValue(v).split("\n");}}},
               y:{grid:{color:"#eef1f5"},ticks:{color:"#5b6776",callback:v=>v.toLocaleString()},
                  title:{display:true,text:"metric tons CO₂ / year",color:"#5b6776"}}}}
+  });
+  seasonChart = new Chart(document.getElementById("seasonChart"), {
+    type:"bar", data:{labels:[],datasets:[]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{position:"top",labels:{color:"#1c2530",usePointStyle:true,pointStyle:"rect",boxWidth:12,font:{size:12}}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+": "+(c.raw>=0?"+":"")+Math.round(c.raw).toLocaleString()+" MWh/yr"}}},
+      scales:{x:{grid:{display:false},ticks:{color:"#5b6776",font:{size:12}}},
+              y:{grid:{color:"#eef1f5"},ticks:{color:"#5b6776",callback:v=>v.toLocaleString()},
+                 title:{display:true,text:"MWh / year (− = reduction)",color:"#5b6776"}}}}
   });
 }
 render();
