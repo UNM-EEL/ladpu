@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Should I Switch? Los Alamos Home Electrification Calculator</title>
+<title>Electrification Program Willingness to Pay</title>
 <script>/**
  * Skipped minification because the original files appears to be already minified.
  * Original file: /npm/chart.js@4.4.1/dist/chart.umd.js
@@ -27,7 +27,7 @@
 </script>
 <style>
   :root{
-    --navy:#1f3864; --blue:#2e5496; --elec:#37618e; --gas:#d98c3f; --save:#5a9e6f; --cost:#b5553f;
+    --navy:#1f3864; --blue:#2e5496; --carbon:#5a9e6f; --eff:#37618e; --rebate:#d98c3f;
     --grey:#9aa7b4; --ink:#1c2530; --muted:#5b6776; --line:#e2e7ee; --bg:#f5f7fa; --card:#ffffff;
   }
   *{box-sizing:border-box}
@@ -46,7 +46,7 @@
   main>*{min-width:0}
   @media(max-width:920px){
     main{grid-template-columns:1fr}
-    .controls{order:1}            /* inputs first on narrow screens */
+    .controls{order:1}
     main>section{order:2}
   }
   @media(max-width:600px){
@@ -57,52 +57,40 @@
   h2:first-of-type{margin-top:4px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
     box-shadow:0 1px 2px rgba(20,40,80,.04)}
-  .controls .hint{font-size:12px;color:var(--muted);margin:-4px 0 8px}
-  .app{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);
-    border-radius:9px;margin-bottom:7px;cursor:pointer;background:#fff}
-  .app:hover{border-color:var(--blue)}
-  .app input{width:17px;height:17px;accent-color:var(--blue);cursor:pointer}
-  .app .nm{flex:1;font-size:14px}
-  .app .sw{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
-  .app.off{opacity:.5}
-  .app.off .sw{visibility:hidden}
-  .solar{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--save);
-    border-radius:9px;background:#f1f7f3;cursor:pointer;margin-top:2px}
-  .solar input{width:17px;height:17px;accent-color:var(--save);cursor:pointer}
-  .solar .nm{flex:1;font-size:14px}
+  .controls .hint{font-size:12px;color:var(--muted);margin:-4px 0 10px}
+  .ctl{margin:13px 0}
+  .ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink);margin-bottom:4px}
+  .ctl label b{font-weight:700;color:var(--blue);font-size:13.5px}
+  .ctl .lvl{font-size:11px;color:var(--muted)}
+  input[type=range]{width:100%;accent-color:var(--blue);cursor:pointer}
   details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
   summary{font-size:12.5px;color:var(--blue);cursor:pointer;user-select:none}
-  .num{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:7px 0;font-size:13px}
-  .num label{color:var(--muted)} .num .u{color:var(--muted);font-size:11.5px}
-  .num input{width:78px;text-align:right;border:1px solid var(--line);border-radius:6px;padding:5px 7px;
-    font-family:inherit;font-size:13px}
-  .toggle{display:flex;gap:6px;margin:6px 0 2px}
+  .toggle{display:flex;gap:6px;margin:8px 0 2px}
   .toggle button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;
     font-family:inherit;font-size:12.5px;cursor:pointer;color:var(--muted)}
   .toggle button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
   .reset{margin-top:14px;width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;
     padding:9px;font-family:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
   .reset:hover{background:#f0f3f8}
-  /* results */
-  .headline{display:grid;grid-template-columns:1fr;gap:0;margin-bottom:16px;text-align:center;
-    border-radius:12px;overflow:hidden;border:1px solid var(--line)}
-  .headline .big{padding:20px 16px;background:var(--card)}
+  .headline{text-align:center;border-radius:12px;border:1px solid var(--line);background:var(--card);
+    padding:20px 16px;margin-bottom:14px}
   .headline .lab{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-  .headline .val{font-size:34px;font-weight:700;margin:4px 0 2px}
+  .headline .val{font-size:34px;font-weight:700;margin:4px 0 2px;color:var(--navy)}
   .headline .sub{font-size:13px;color:var(--muted)}
-  .val.save{color:var(--save)} .val.cost{color:var(--cost)}
+  .caveat{background:#fff7ed;border:1px solid #f0d8b8;border-radius:10px;padding:11px 14px;
+    font-size:12.5px;color:#7a5320;margin-bottom:16px}
+  .caveat b{color:#5e3f18}
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
   @media(max-width:620px){.cards{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
   .card .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
   .card .v{font-size:23px;font-weight:700;margin:5px 0 2px}
   .card .d{font-size:12.5px;color:var(--muted)}
-  .v.elec{color:var(--elec)} .v.gas{color:var(--gas)} .v.sun{color:var(--save)}
+  .v.carbon{color:var(--carbon)} .v.eff{color:var(--eff)} .v.rebate{color:var(--rebate)}
   .chartwrap h3{margin:0 0 8px;font-size:15px;font-weight:600}
-  .chartbox{position:relative;height:280px;width:100%}
+  .chartbox{position:relative;height:300px;width:100%}
   footer{padding:16px 22px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line)}
-  footer a{color:var(--blue)}
-  .hl{color:var(--ink);font-weight:600}
+  footer a{color:var(--blue)} .hl{color:var(--ink);font-weight:600}
   .modal-bg{position:fixed;inset:0;background:rgba(15,25,45,.45);display:none;z-index:30;padding:20px;overflow:auto}
   .modal-bg.open{display:flex} .modal{background:#fff;max-width:680px;margin:auto;border-radius:14px;padding:24px 26px}
   .modal h2{color:var(--ink);text-transform:none;letter-spacing:0;font-size:20px;margin:4px 0 10px}
@@ -115,79 +103,67 @@
 <body>
 <header>
   <div>
-    <h1>Should I Switch? &mdash; Home Electrification Calculator</h1>
-    <p>Estimate what happens to your electricity use, your natural-gas use, and your yearly energy bill if you
-       replace gas appliances with electric ones. Pick what you have, choose what to switch, and the
-       numbers update instantly. All rates are editable.</p>
+    <h1>Electrification Program: Willingness to Pay</h1>
+    <p>How much Los Alamos households say electrification program features are worth, from the
+       choice-experiment survey. Set the program design and the target population; the estimate updates
+       instantly. These are stated values, not bill savings.</p>
   </div>
   <div class="nav">
     <a href="index.html">&larr; County projection</a>
-    <a href="dce.html">Program WTP</a>
-    <button class="about-btn" id="aboutBtn">&#9432;&nbsp; Assumptions</button>
+    <a href="house.html">Household calculator</a>
+    <button class="about-btn" id="aboutBtn">&#9432;&nbsp; About</button>
   </div>
 </header>
 
 <main>
   <aside class="panel controls">
-    <h2>1. Which gas appliances do you have?</h2>
-    <p class="hint">Check what runs on natural gas today, then check the box on the right to switch it to electric.</p>
-    <div id="appList"></div>
+    <h2>1. Program design</h2>
+    <p class="hint">What the program offers households. WTP is per percentage point of each feature.</p>
+    <div id="progBox"></div>
 
-    <h2>2. Where is your home?</h2>
-    <div class="toggle" id="locToggle">
-      <button data-loc="los_alamos" class="on">Los Alamos townsite</button>
-      <button data-loc="white_rock">White Rock</button>
-    </div>
-    <p class="hint">Your gas bill reads in CCF; your area sets how CCF converts to energy.</p>
-
-    <h2>3. Add rooftop solar?</h2>
-    <label class="solar"><input type="checkbox" id="solar">
-      <span class="nm">Install rooftop solar panels</span><span class="sw">typical home</span></label>
+    <h2>2. Target population</h2>
+    <div id="popBox"></div>
 
     <details>
-      <summary>Adjust to your home (optional)</summary>
-      <p class="hint" style="margin-top:8px">Prefilled with the Los Alamos study averages. Change any value to match your home.</p>
-      <div id="usageBox"></div>
-    </details>
-
-    <details>
-      <summary>Electricity &amp; gas rates (editable)</summary>
-      <div class="toggle" id="rateToggle" style="margin-top:10px">
-        <button data-rate="tou" class="on">Time-of-use</button>
-        <button data-rate="flat">Flat rate</button>
+      <summary>Advanced</summary>
+      <div class="toggle" id="infoToggle" style="margin-top:10px">
+        <button data-info="0" class="on">No information nudge</button>
+        <button data-info="1">With info nudge</button>
       </div>
-      <div id="rateBox"></div>
+      <p class="hint" style="margin-top:8px">The survey's information treatment had no statistically
+         significant effect on WTP; included only for exploration.</p>
     </details>
 
-    <button class="reset" id="reset">Restore defaults</button>
+    <button class="reset" id="reset">Restore the study scenario</button>
   </aside>
 
   <section>
     <div class="headline">
-      <div class="big">
-        <div class="lab">Estimated change to your yearly energy bill</div>
-        <div class="val" id="netVal">&mdash;</div>
-        <div class="sub" id="netSub"></div>
-      </div>
+      <div class="lab">Estimated average stated WTP</div>
+      <div class="val" id="totVal">&mdash;</div>
+      <div class="sub" id="totSub">per household, per month, for this program</div>
+    </div>
+
+    <div class="caveat">
+      <b>Stated willingness to pay, not bill savings.</b> These are survey-elicited values &mdash; what
+      households say program features are worth &mdash; and they run well above realized energy savings.
+      Treat them as upper bounds. The sample is high-income Los Alamos, so levels do not generalize.
     </div>
 
     <div class="cards" id="cards"></div>
 
     <div class="panel chartwrap">
-      <h3>Estimated change to your annual energy bill (at current rates)</h3>
-      <div class="chartbox"><canvas id="billChart"></canvas></div>
+      <h3>What each feature contributes to monthly WTP</h3>
+      <div class="chartbox"><canvas id="wtpChart"></canvas></div>
     </div>
     <p class="disclaim" id="disclaim"></p>
   </section>
 </main>
 
 <footer>
-  Estimates from the LADPU zero-gas white paper: each switch uses the measured electricity-added and
-  gas-saved from the Part-IV household regressions; solar uses the Part-III grid effect. Rate defaults
-  from the <span class="hl">LADPU residential rate schedule</span> and are editable. This is a planning
-  estimate, not a bill quote.
-  <br>This is a research tool for general information only, not financial advice and not an official
-  LADPU bill calculator. Actual bills depend on your home, equipment, usage, and current rates.
+  Estimates from the LADPU electrification discrete choice experiment (mixed-logit WTP-space model).
+  WTP rises with environmental concern (NEP) and falls when a home needs an electrical panel upgrade.
+  <br>This is a research tool for general information only, not an official LADPU tool.
   <br>Funded by the Los Alamos Department of Public Utilities and the New Mexico Legislature
   (UNM Research and Public Service Project, SB&nbsp;377; and SB&nbsp;0192). Results are based on the
   authors' own analysis and do not necessarily reflect the views of the Los Alamos Department of
@@ -198,203 +174,133 @@
 <div class="modal-bg" id="aboutModal">
   <div class="modal">
     <button class="close" id="aboutClose">Close &times;</button>
-    <h2>How this calculator works</h2>
-    <p>For each gas appliance you switch to electric, the tool adds the electricity that switch typically
-       uses and removes the natural gas it typically burns, then prices the difference with the LADPU
-       residential rates. The per-appliance numbers come from the same Los Alamos household data and
-       regressions used in the county-wide projection.</p>
+    <h2>About these willingness-to-pay estimates</h2>
+    <p>In a survey choice experiment, 403 Los Alamos households chose between hypothetical
+       electrification programs that varied in four features. A mixed-logit model recovers how much each
+       feature is worth to households, in dollars per month. This tool replays that model: you set a
+       program and a target population, and it predicts the average household's stated willingness to pay.</p>
 
-    <h3>Typical per-appliance effect (per year, editable)</h3>
-    <ul id="aboutApp"></ul>
-    <p>Space-heating use varies the most between homes, so its electricity is scaled to the gas you enter
-       under &ldquo;Adjust to your home.&rdquo; A heat pump for space or water heating is assumed; the
-       added electricity already reflects that efficiency, not plain resistance heating.</p>
+    <h3>The program features</h3>
+    <ul>
+      <li><b>Carbon reduction</b> (0&ndash;100%): the cut in household carbon emissions from going
+          electric. Worth about <b id="aboutCarbon"></b>/month per percentage point.</li>
+      <li><b>Energy efficiency</b> (0&ndash;50%): how much more efficient the electric appliances are.
+          The most valued feature, about <b id="aboutEff"></b>/month per point.</li>
+      <li><b>Rebate</b> (0&ndash;75%): the share of up-front cost covered by incentives. Worth about
+          <b id="aboutRebate"></b>/month per point.</li>
+    </ul>
 
-    <h3>Rooftop solar (net billing)</h3>
-    <p>A typical Los Alamos rooftop system is about <b id="aboutKw"></b> kW and generates roughly
-       <b id="aboutSolar"></b> kWh per year (the local solar resource is about
-       <b id="aboutYield"></b> kWh per kW). This is the panels' theoretical output, not a system-wide
-       average. LADPU uses <em>net billing</em>: the solar you use in your own home offsets power at the
-       off-peak retail rate, while the excess you export is credited at the lower wholesale rate (about
-       $<b id="aboutWhole"></b>/kWh). The tool values your generation as that blend; set your system size,
-       self-consumed share, and the wholesale rate under the inputs.</p>
+    <h3>Who is paying</h3>
+    <p>Willingness to pay rises with <b>environmental concern</b> (the survey's NEP scale) and falls
+       sharply when a household needs an <b>electrical panel upgrade</b> to electrify. The panel-upgrade
+       penalty is large: it lowers feature WTP and adds a roughly $68/month hurdle to adopting at all.
+       About 79% of the sampled homes needed an upgrade. Set the share to match your service area.</p>
 
-    <h3>Reading your gas in CCF</h3>
-    <p>Your gas meter and bill are in CCF (hundred cubic feet), so you enter usage in CCF here. The tool
-       converts CCF to energy (therms) behind the scenes with a factor that depends on elevation: about
-       <b id="aboutTpcLA"></b> therms per CCF in the Los Alamos townsite and <b id="aboutTpcWR"></b> therms
-       per CCF in White Rock. Pick your area so the conversion matches your bill.</p>
-
-    <h3>Rates</h3>
-    <p>LADPU is moving to <b>time-of-use</b> pricing: electricity costs more during peak hours and less
-       off-peak. New heating and water-heating load is split between peak and off-peak using the
-       &ldquo;peak share&rdquo; you set. You can switch to a single flat rate instead. If you switch
-       <em>every</em> gas appliance, the tool also removes the fixed monthly gas service charge, since
-       you could disconnect gas entirely.</p>
-
-    <h3>What it does not capture</h3>
-    <p>Up-front equipment and installation cost, federal or state tax credits, financing, and future rate
-       changes are not included &mdash; this shows the change in <em>annual energy bills</em> only.
-       Actual results depend on your home, equipment, and habits.</p>
-    <p>Full methodology and data are in the LADPU zero-gas white paper.
+    <h3>Important limits</h3>
+    <p>These are <em>stated</em> values from a hypothetical survey. The paper notes the stated WTP for a
+       50% efficiency gain (about $115/month) is several times larger than the realized energy savings it
+       implies, so the dollar figures are upper bounds on what households would actually pay, not bill
+       savings. The sample is unusually high-income (81% earn over $150K) and scientist-heavy, so the
+       magnitudes do not generalize; about a third of respondents always chose the status quo
+       (&ldquo;protesters&rdquo;); and the environmental-concern relationship is associational, not causal.</p>
+    <p>Full methodology is in the LADPU electrification choice-experiment paper.
        <a href="https://github.com/UNM-EEL">UNM Energy Econ Lab on GitHub &rarr;</a></p>
   </div>
 </div>
 
 <script>
-const D = {"KWH":{"space":1131,"water":1561,"cooking":537,"dryer":521},"THERMS":{"space":621.2,"water":170.7,"cooking":58.7,"dryer":57.0},"CCF":{"space":773,"water":212,"cooking":73,"dryer":71},"ELEV":{"los_alamos":0.78,"white_rock":0.81},"HEAT":1.03,"SYS_KW":5.3,"SPEC_YIELD":1700,"RATES":{"tou_peak":0.197,"tou_off":0.11,"peak_share":0.4,"flat":0.15,"gas_therm":0.77,"gas_service":13.45,"wholesale":0.06,"solar_self":0.4}};
-const EU = ["space","water","cooking","dryer"];
-const LBL = {space:"Space heating", water:"Water heater", cooking:"Cooking range", dryer:"Clothes dryer"};
-const fmt = n => Math.round(n).toLocaleString();
-const money = n => (n<0?"−$":"$") + Math.abs(Math.round(n)).toLocaleString();
+const D = {"beta":{"carbon":1.494,"efficiency":2.308,"rebate":1.098},"nep":{"carbon":0.794,"efficiency":0.693,"rebate":0.368},"panel":{"carbon":-0.894,"efficiency":-0.8,"rebate":0.323},"info":{"carbon":0.034,"efficiency":0.257,"rebate":-0.224},"max":{"carbon":100,"efficiency":50,"rebate":75},"scenario":{"carbon":66,"efficiency":50,"rebate":50},"nep_pct":{"P10":-1.462,"P25":-0.867,"P50":0.16,"P75":0.911,"P90":1.111},"nep_default":0.16,"panel_share_default":0.787};
+const ATT = ["carbon","efficiency","rebate"];
+const LBL = {carbon:"Carbon reduction", efficiency:"Energy efficiency", rebate:"Rebate"};
+const COL = {carbon:"#5a9e6f", efficiency:"#37618e", rebate:"#d98c3f"};
+const money = n => "$" + (Math.round(n*10)/10).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:1});
+const money0 = n => "$" + Math.round(n).toLocaleString();
 
 function defaults(){
-  return {
-    have: {space:true, water:true, cooking:true, dryer:true},   // typical gas home
-    sw:   {space:true, water:true, cooking:true, dryer:true},
-    solar:false, rate:"tou", loc:"los_alamos",
-    kwh: Object.assign({}, D.KWH), ccf: Object.assign({}, D.CCF), sys_kw: D.SYS_KW,
-    R: Object.assign({}, D.RATES),
-  };
+  return {carbon:D.scenario.carbon, efficiency:D.scenario.efficiency, rebate:D.scenario.rebate,
+          nep:D.nep_default, panel_share:D.panel_share_default, info:0};
 }
-const tpc = loc => D.ELEV[loc]*D.HEAT;     // therms per CCF, by service area
 let s = defaults();
 
-// ---- model ----
+// marginal WTP ($/mo per percentage point) for attribute k, blended over panel-upgrade share
+function perPoint(k){
+  const at = p => D.beta[k] + D.nep[k]*s.nep + D.panel[k]*p + D.info[k]*s.info;
+  return s.panel_share*at(1) + (1-s.panel_share)*at(0);
+}
 function compute(){
-  const t = tpc(s.loc);
-  let addKwh=0, savedTherms=0, savedCcf=0;
-  EU.forEach(k=>{
-    if(s.have[k] && s.sw[k]){
-      const th = s.ccf[k]*t;                                   // CCF on the bill -> therms of energy
-      // space-heat electricity scales with the home's heating energy; appliance deltas are flat
-      const scale = (k==="space") ? (th / D.THERMS.space) : 1;
-      addKwh += s.kwh[k]*scale;
-      savedTherms += th; savedCcf += s.ccf[k];
-    }
-  });
-  const solarKwh = s.solar ? s.sys_kw*D.SPEC_YIELD : 0;   // theoretical generation = size x yield
-  const eAdd = s.rate==="tou" ? (s.R.peak_share*s.R.tou_peak + (1-s.R.peak_share)*s.R.tou_off) : s.R.flat;
-  // net billing: self-consumed solar offsets retail (off-peak/flat); exports credited at wholesale
-  const eRetail = s.rate==="tou" ? s.R.tou_off : s.R.flat;
-  const eSolar = s.R.solar_self*eRetail + (1-s.R.solar_self)*s.R.wholesale;
-  const addElecCost = addKwh * eAdd;
-  const solarSave = solarKwh * eSolar;
-  let gasSave = savedTherms * s.R.gas_therm;
-  // full electrification: no gas appliances remain -> drop the monthly gas service charge
-  const ownGas = EU.filter(k=>s.have[k]);
-  const allSwitched = ownGas.length>0 && ownGas.every(k=>s.sw[k]);
-  const serviceSave = allSwitched ? s.R.gas_service*12 : 0;
-  const net = addElecCost - gasSave - serviceSave - solarSave;   // >0 bill up, <0 saving
-  return {addKwh, savedTherms, savedCcf, solarKwh, addElecCost, gasSave, serviceSave, solarSave, net, allSwitched};
+  const per={}, contrib={}; let total=0;
+  ATT.forEach(k=>{ per[k]=perPoint(k); contrib[k]=per[k]*s[k]; total+=contrib[k]; });
+  return {per, contrib, total};
 }
 
 // ---- render ----
-let billChart;
+let wtpChart;
 function render(){
   const c = compute();
-  // headline
-  const nv = document.getElementById("netVal"), ns = document.getElementById("netSub");
-  if(c.net < 0){ nv.className="val save"; nv.textContent = "≈ "+money(-c.net)+" lower / year";
-    ns.textContent = "Estimated saving at current rates. Your actual bill depends on your home, equipment, and usage."; }
-  else if(c.net > 0){ nv.className="val cost"; nv.textContent = "≈ "+money(c.net)+" higher / year";
-    ns.textContent = "Estimated increase at current rates. Your actual bill depends on your home, equipment, and usage."; }
-  else { nv.className="val"; nv.textContent = "About the same"; ns.textContent="Estimated, at current rates."; }
+  document.getElementById("totVal").textContent = "≈ " + money0(c.total) + " / month";
 
-  document.getElementById("cards").innerHTML = [
-    `<div class="card"><div class="k">Electricity</div><div class="v elec">≈ +${fmt(c.addKwh)} kWh</div><div class="d">more per year &middot; about +${money(c.addElecCost)}/yr</div></div>`,
-    `<div class="card"><div class="k">Natural gas</div><div class="v gas">≈ −${fmt(c.savedCcf)} CCF</div><div class="d">saved per year (≈ ${fmt(c.savedTherms)} therms) &middot; about −${money(c.gasSave+c.serviceSave)}/yr</div></div>`,
-    c.solarKwh>0
-      ? `<div class="card"><div class="k">Rooftop solar</div><div class="v sun">≈ ${fmt(c.solarKwh)} kWh</div><div class="d">generated/yr &middot; worth about −${money(c.solarSave)}/yr</div></div>`
-      : `<div class="card"><div class="k">Rooftop solar</div><div class="v">&mdash;</div><div class="d">not included</div></div>`,
-  ].join("");
+  document.getElementById("cards").innerHTML = ATT.map(k=>{
+    const per10 = c.per[k]*10;
+    return `<div class="card"><div class="k">${LBL[k]}</div>
+      <div class="v ${k==='efficiency'?'eff':k}">${money0(c.contrib[k])}/mo</div>
+      <div class="d">at ${s[k]}% &middot; about ${money(per10)}/mo per +10 points</div></div>`;
+  }).join("");
 
   const dl = document.getElementById("disclaim");
-  const svcYr = money(s.R.gas_service*12);
-  dl.textContent = c.allSwitched
-    ? "You switched every gas appliance, so the fixed gas service charge ("+svcYr+"/yr) is removed — you could disconnect gas entirely. That avoided charge is a large part of the saving."
-    : "You still have gas appliances, so you keep paying the gas service charge ("+svcYr+"/yr). Electrifying just one appliance can raise your bill; the bigger savings come from going all-electric and dropping gas service.";
+  dl.textContent = "Reading: each +10 percentage points of carbon reduction changes average WTP by about "
+    + money(c.per.carbon*10) + "/month; efficiency by " + money(c.per.efficiency*10)
+    + "; rebate by " + money(c.per.rebate*10) + " (at the current population settings).";
 
-  // bar chart: cost components (added electric up; gas, service, solar down) and the net
-  const labels = ["Electricity\nadded","Gas\nsaved","Gas service\nsaved","Solar\nsaved","Net\nchange"];
-  const vals = [c.addElecCost, -c.gasSave, -c.serviceSave, -c.solarSave, c.net];
-  const colors = ["#37618e","#d98c3f","#caa15a","#5a9e6f", c.net<0?"#5a9e6f":"#b5553f"];
-  if(billChart){
-    billChart.data.labels = labels;
-    billChart.data.datasets = [{data:vals, backgroundColor:colors, borderRadius:5,
-      borderWidth:0, maxBarThickness:64}];
-    billChart.update();
+  if(wtpChart){
+    wtpChart.data.labels = ATT.map(k=>LBL[k]);
+    wtpChart.data.datasets = [{data:ATT.map(k=>c.contrib[k]),
+      backgroundColor:ATT.map(k=>COL[k]), borderRadius:5, borderWidth:0, maxBarThickness:90}];
+    wtpChart.update();
   }
 }
 
 // ---- controls ----
-function buildApps(){
-  const box = document.getElementById("appList"); box.innerHTML="";
-  EU.forEach(k=>{
-    const row = document.createElement("label"); row.className="app"+(s.have[k]?"":" off");
-    row.innerHTML = `<input type="checkbox" class="have" ${s.have[k]?"checked":""}>
-      <span class="nm">${LBL[k]}</span>
-      <span class="sw"><input type="checkbox" class="sw" ${s.sw[k]?"checked":""}> switch to electric</span>`;
-    box.appendChild(row);
-    const [have, sw] = row.querySelectorAll("input");
-    have.addEventListener("change",()=>{ s.have[k]=have.checked; if(!have.checked) s.sw[k]=false;
-      else s.sw[k]=true; buildApps(); render(); });
-    sw.addEventListener("change",(e)=>{ e.stopPropagation(); s.sw[k]=sw.checked; render(); });
-    sw.addEventListener("click",e=>e.stopPropagation());
-  });
+function slider(box, label, min, max, step, get, set, fmt, lvl){
+  const wrap=document.createElement("div"); wrap.className="ctl";
+  wrap.innerHTML = `<label>${label} <b></b></label><input type="range" min="${min}" max="${max}" step="${step}">
+    ${lvl?`<div class="lvl">${lvl}</div>`:""}`;
+  box.appendChild(wrap);
+  const inp=wrap.querySelector("input"), out=wrap.querySelector("b");
+  const show=()=>out.textContent=fmt(get());
+  inp.value=get(); show();
+  inp.addEventListener("input",()=>{ set(parseFloat(inp.value)); show(); render(); });
 }
-function numRow(box, label, unit, get, set, step){
-  const r=document.createElement("div"); r.className="num";
-  r.innerHTML=`<label>${label}</label><span><input type="number" step="${step}"><span class="u"> ${unit}</span></span>`;
-  box.appendChild(r);
-  const inp=r.querySelector("input"); inp.value=get();
-  inp.addEventListener("input",()=>{ const v=parseFloat(inp.value); if(!isNaN(v)){set(v); render();} });
+const pct = v => Math.round(v)+"%";
+function nepLabel(v){
+  const r = Math.round(18.8 + 7.1*v);   // approximate raw NEP (range ~6-30)
+  const d = v < -0.6 ? "Below average" : v > 0.6 ? "Above average" : "About average";
+  return d + " (≈ " + r + "/30)";
 }
-function buildUsage(){
-  const box=document.getElementById("usageBox"); box.innerHTML="";
-  EU.forEach(k=>numRow(box, LBL[k]+" gas", "CCF/yr", ()=>s.ccf[k], v=>s.ccf[k]=v, 1));
-  numRow(box, "Solar system size", "kW", ()=>s.sys_kw, v=>s.sys_kw=v, 0.5);
-}
-function buildRates(){
-  const box=document.getElementById("rateBox"); box.innerHTML="";
-  if(s.rate==="tou"){
-    numRow(box,"Peak price","$/kWh",()=>s.R.tou_peak,v=>s.R.tou_peak=v,0.001);
-    numRow(box,"Off-peak price","$/kWh",()=>s.R.tou_off,v=>s.R.tou_off=v,0.001);
-    numRow(box,"New load in peak hours","share 0-1",()=>s.R.peak_share,v=>s.R.peak_share=v,0.05);
-  } else {
-    numRow(box,"Electricity price","$/kWh",()=>s.R.flat,v=>s.R.flat=v,0.001);
-  }
-  numRow(box,"Solar self-consumed","share 0-1",()=>s.R.solar_self,v=>s.R.solar_self=v,0.05);
-  numRow(box,"Wholesale export price","$/kWh",()=>s.R.wholesale,v=>s.R.wholesale=v,0.005);
-  numRow(box,"Natural gas price","$/therm",()=>s.R.gas_therm,v=>s.R.gas_therm=v,0.01);
-  numRow(box,"Gas service charge","$/month",()=>s.R.gas_service,v=>s.R.gas_service=v,0.5);
+function buildControls(){
+  const pb=document.getElementById("progBox"); pb.innerHTML="";
+  slider(pb,"Carbon reduction",0,100,1,()=>s.carbon,v=>s.carbon=v,pct,"survey levels: 0 / 33 / 66 / 100%");
+  slider(pb,"Energy efficiency",0,50,1,()=>s.efficiency,v=>s.efficiency=v,pct,"survey levels: 0 / 10 / 25 / 50%");
+  slider(pb,"Rebate (cost covered)",0,75,1,()=>s.rebate,v=>s.rebate=v,pct,"survey levels: 0 / 30 / 50 / 75%");
+  const ob=document.getElementById("popBox"); ob.innerHTML="";
+  slider(ob,"Environmental concern (NEP)",-1.5,1.27,0.01,()=>s.nep,v=>s.nep=v,nepLabel,
+         "lower &rarr; higher willingness to pay");
+  slider(ob,"Homes needing a panel upgrade",0,100,1,()=>s.panel_share*100,v=>s.panel_share=v/100,pct,
+         "78.7% in the study sample");
 }
 
-document.getElementById("solar").addEventListener("change",e=>{ s.solar=e.target.checked; render(); });
-document.querySelectorAll("#locToggle button").forEach(b=>b.addEventListener("click",()=>{
-  s.loc=b.dataset.loc; document.querySelectorAll("#locToggle button").forEach(x=>x.classList.toggle("on",x===b));
+document.querySelectorAll("#infoToggle button").forEach(b=>b.addEventListener("click",()=>{
+  s.info=parseInt(b.dataset.info); document.querySelectorAll("#infoToggle button").forEach(x=>x.classList.toggle("on",x===b));
   render();
 }));
-document.querySelectorAll("#rateToggle button").forEach(b=>b.addEventListener("click",()=>{
-  s.rate=b.dataset.rate; document.querySelectorAll("#rateToggle button").forEach(x=>x.classList.toggle("on",x===b));
-  buildRates(); render();
-}));
 document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
-  document.getElementById("solar").checked=false;
-  document.querySelectorAll("#locToggle button").forEach(x=>x.classList.toggle("on",x.dataset.loc==="los_alamos"));
-  document.querySelectorAll("#rateToggle button").forEach(x=>x.classList.toggle("on",x.dataset.rate==="tou"));
-  buildApps(); buildUsage(); buildRates(); render(); });
+  document.querySelectorAll("#infoToggle button").forEach(x=>x.classList.toggle("on",x.dataset.info==="0"));
+  buildControls(); render(); });
 
 // about modal
 (function(){
-  const ul=document.getElementById("aboutApp");
-  ul.innerHTML = EU.map(k=>`<li><b>${LBL[k]}:</b> +${fmt(D.KWH[k])} kWh/yr electricity, −${fmt(D.THERMS[k])} therms/yr gas.</li>`).join("");
-  document.getElementById("aboutSolar").textContent = fmt(D.SYS_KW*D.SPEC_YIELD);
-  document.getElementById("aboutKw").textContent = D.SYS_KW;
-  document.getElementById("aboutYield").textContent = fmt(D.SPEC_YIELD);
-  document.getElementById("aboutWhole").textContent = D.RATES.wholesale.toFixed(2);
-  document.getElementById("aboutTpcLA").textContent = (D.ELEV.los_alamos*D.HEAT).toFixed(2);
-  document.getElementById("aboutTpcWR").textContent = (D.ELEV.white_rock*D.HEAT).toFixed(2);
+  document.getElementById("aboutCarbon").textContent = money(D.beta.carbon);
+  document.getElementById("aboutEff").textContent = money(D.beta.efficiency);
+  document.getElementById("aboutRebate").textContent = money(D.beta.rebate);
 })();
 const modal=document.getElementById("aboutModal");
 document.getElementById("aboutBtn").addEventListener("click",()=>modal.classList.add("open"));
@@ -402,19 +308,17 @@ document.getElementById("aboutClose").addEventListener("click",()=>modal.classLi
 modal.addEventListener("click",e=>{ if(e.target===modal) modal.classList.remove("open"); });
 
 // init
-buildApps(); buildUsage(); buildRates();
+buildControls();
 if(typeof Chart !== "undefined"){
-  billChart = new Chart(document.getElementById("billChart"), {
+  wtpChart = new Chart(document.getElementById("wtpChart"), {
     type:"bar",
     data:{labels:[],datasets:[]},
     options:{responsive:true,maintainAspectRatio:false,animation:false,
       plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>(c.raw<0?"−$":"$")+Math.abs(Math.round(c.raw)).toLocaleString()+"/yr"}}},
-      scales:{x:{grid:{display:false},ticks:{color:"#5b6776",font:{size:11},autoSkip:false,
-                 callback:function(v){return this.getLabelForValue(v).split("\n");}}},
-              y:{grid:{color:"#eef1f5"},ticks:{color:"#5b6776",
-                 callback:v=>(v<0?"−$":"$")+Math.abs(v).toLocaleString()},
-                 title:{display:true,text:"$ per year",color:"#5b6776"}}}}
+        tooltip:{callbacks:{label:c=>"$"+Math.round(c.raw).toLocaleString()+"/mo"}}},
+      scales:{x:{grid:{display:false},ticks:{color:"#5b6776",font:{size:12}}},
+              y:{grid:{color:"#eef1f5"},ticks:{color:"#5b6776",callback:v=>"$"+v},
+                 title:{display:true,text:"$ / month",color:"#5b6776"}}}}
   });
 }
 render();
