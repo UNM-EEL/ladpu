@@ -1,6 +1,6 @@
 # Los Alamos Home Energy Tools (UNM Energy Econ Lab)
 
-Interactive tools from the working paper *Pathway to Zero Natural Gas*, on residential
+Interactive tools from the white paper *Pathway to Zero Natural Gas*, on residential
 electrification in Los Alamos, NM.
 
 The landing page at [unm-eel.github.io/ladpu](https://unm-eel.github.io/ladpu/) (`index.html`) links to
@@ -42,12 +42,13 @@ If you use these tools or the underlying analysis, please cite:
   author      = {Yang, Yuting and Mamkhezri, Jamal and Jawhari, Ahmed A. and
                  Zhao, Jiaqing and Cornelius, Benjamin},
   year        = {2026},
-  institution = {University of New Mexico},
-  type        = {Working Paper},
+  institution = {University of New Mexico, Department of Economics},
+  type        = {White Paper},
   address     = {Albuquerque, NM},
-  note        = {Interactive tools: \url{https://unm-eel.github.io/ladpu/}}
+  note        = {Prepared for the State of New Mexico. Interactive tools: \url{https://unm-eel.github.io/ladpu/}}
 }
 ```
 
 > Yang, Y., Mamkhezri, J., Jawhari, A. A., Zhao, J., & Cornelius, B. (2026).
-> *Pathway to Zero Natural Gas*. Working Paper, University of New Mexico.
+> *Pathway to Zero Natural Gas*. White Paper, University of New Mexico Department of Economics,
+> prepared for the State of New Mexico.

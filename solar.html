@@ -227,7 +227,7 @@
 </div>
 
 <script>
-const D = {"grid_kwh":1573,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_default":497,"n_meters":8646,"co2_elec_hs":899.87,"co2_theo_hs":3915.17};
+const D = {"grid_kwh":1573,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_default":497,"n_meters":8646,"co2_elec_hs":899.87,"co2_gas_hs":78.04,"co2_theo_hs":3915.17};
 const fmt = n => Math.round(n).toLocaleString();
 const fmt1 = n => (Math.round(n*10)/10).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:1});
 
@@ -242,7 +242,8 @@ function compute(){
   // electricity: study mode weights avoided kWh by hour x season marginal EFs (paper's preferred);
   // flat mode applies a single user EF to the annual avoided kWh.
   const co2_elec = study ? n * D.co2_elec_hs : n * D.grid_kwh * s.ef_elec;        // kg/yr
-  const co2_gas = s.gas ? n * D.gas_therms * s.ef_gas : 0;                         // kg/yr (constant combustion)
+  // gas CO2: study mode uses the paper's hour x season net (col 4); flat mode uses therms x combustion EF
+  const co2_gas = !s.gas ? 0 : (study ? n * D.co2_gas_hs : n * D.gas_therms * s.ef_gas);
   const theo_elec = study ? n * D.co2_theo_hs : n * D.gross_gen * s.ef_elec;       // 1:1 offset, no rebound
   const co2_t = (co2_elec + co2_gas) / 1000;             // metric tons/yr
   return {n, loadMWh, gasTherms, co2_elec, co2_gas, co2_t,
