@@ -32,7 +32,7 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.5}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
   header{background:linear-gradient(110deg,var(--navy),var(--blue));color:#fff;padding:20px 22px;
     display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
   header h1{margin:0 0 6px;font-size:21px;font-weight:700}
@@ -162,7 +162,7 @@
   <section>
     <div class="headline">
       <div class="big">
-        <div class="lab">Change to your yearly bill</div>
+        <div class="lab">Estimated change to your yearly bill</div>
         <div class="val" id="netVal">&mdash;</div>
         <div class="sub" id="netSub"></div>
       </div>
@@ -171,7 +171,7 @@
     <div class="cards" id="cards"></div>
 
     <div class="panel chartwrap">
-      <h3>How the switch changes your annual bill</h3>
+      <h3>Estimated change to your annual bill (at current rates)</h3>
       <div class="chartbox"><canvas id="billChart"></canvas></div>
     </div>
     <p class="disclaim" id="disclaim"></p>
@@ -292,17 +292,17 @@ function render(){
   const c = compute();
   // headline
   const nv = document.getElementById("netVal"), ns = document.getElementById("netSub");
-  if(c.net < 0){ nv.className="val save"; nv.textContent = money(-c.net)+" saved / year";
-    ns.textContent = "Your energy bill goes down."; }
-  else if(c.net > 0){ nv.className="val cost"; nv.textContent = money(c.net)+" more / year";
-    ns.textContent = "Your energy bill goes up at current rates."; }
-  else { nv.className="val"; nv.textContent = "No change"; ns.textContent=""; }
+  if(c.net < 0){ nv.className="val save"; nv.textContent = "≈ "+money(-c.net)+" lower / year";
+    ns.textContent = "Estimated saving at current rates. Your actual bill depends on your home, equipment, and usage."; }
+  else if(c.net > 0){ nv.className="val cost"; nv.textContent = "≈ "+money(c.net)+" higher / year";
+    ns.textContent = "Estimated increase at current rates. Your actual bill depends on your home, equipment, and usage."; }
+  else { nv.className="val"; nv.textContent = "About the same"; ns.textContent="Estimated, at current rates."; }
 
   document.getElementById("cards").innerHTML = [
-    `<div class="card"><div class="k">Electricity</div><div class="v elec">+${fmt(c.addKwh)} kWh</div><div class="d">more per year &middot; +${money(c.addElecCost)}/yr</div></div>`,
-    `<div class="card"><div class="k">Natural gas</div><div class="v gas">−${fmt(c.savedCcf)} CCF</div><div class="d">saved per year (≈ ${fmt(c.savedTherms)} therms) &middot; −${money(c.gasSave+c.serviceSave)}/yr</div></div>`,
+    `<div class="card"><div class="k">Electricity</div><div class="v elec">≈ +${fmt(c.addKwh)} kWh</div><div class="d">more per year &middot; about +${money(c.addElecCost)}/yr</div></div>`,
+    `<div class="card"><div class="k">Natural gas</div><div class="v gas">≈ −${fmt(c.savedCcf)} CCF</div><div class="d">saved per year (≈ ${fmt(c.savedTherms)} therms) &middot; about −${money(c.gasSave+c.serviceSave)}/yr</div></div>`,
     c.solarKwh>0
-      ? `<div class="card"><div class="k">Rooftop solar</div><div class="v sun">${fmt(c.solarKwh)} kWh</div><div class="d">generated/yr &middot; worth −${money(c.solarSave)}/yr</div></div>`
+      ? `<div class="card"><div class="k">Rooftop solar</div><div class="v sun">≈ ${fmt(c.solarKwh)} kWh</div><div class="d">generated/yr &middot; worth about −${money(c.solarSave)}/yr</div></div>`
       : `<div class="card"><div class="k">Rooftop solar</div><div class="v">&mdash;</div><div class="d">not included</div></div>`,
   ].join("");
 
