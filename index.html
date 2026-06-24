@@ -35,8 +35,11 @@
   header p{margin:8px 0 0;font-size:14.5px;color:#c7d2e4;max-width:760px}
   main{max-width:980px;margin:0 auto;padding:26px 22px 8px}
   .intro{font-size:14.5px;color:var(--muted);max-width:760px;margin:0 0 22px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:18px}
-  @media(max-width:520px){.grid{grid-template-columns:1fr}}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .grouphead{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+    font-weight:700;margin:26px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .group:first-of-type .grouphead{margin-top:4px}
   .card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);
     border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;
     box-shadow:0 1px 2px rgba(20,40,80,.05);transition:transform .12s,box-shadow .12s}
@@ -67,7 +70,9 @@
   <p class="intro">Pick a tool. Each one runs entirely in your browser, updates as you change the inputs,
      and explains its assumptions. These are research tools for general information, not official utility tools.</p>
 
-  <div class="grid">
+  <div class="group">
+    <div class="grouphead">For utilities</div>
+    <div class="grid">
     <a class="card" href="projection.html">
       <div class="accent" style="background:#37618e"></div>
       <div class="thumb"><canvas id="thumbProj"></canvas></div>
@@ -75,16 +80,6 @@
         <div class="tag">System-wide · 2025–2070</div>
         <h2>County Energy Projection</h2>
         <p>How Los Alamos County's residential electricity and natural gas use could evolve through 2070 under different electrification scenarios, with rooftop solar and 95% uncertainty bands.</p>
-        <div class="open">Open tool &rarr;</div>
-      </div>
-    </a>
-    <a class="card" href="house.html">
-      <div class="accent" style="background:#5a9e6f"></div>
-      <div class="thumb"><canvas id="thumbHouse"></canvas></div>
-      <div class="body">
-        <div class="tag">For a single household</div>
-        <h2>Home Electrification Calculator</h2>
-        <p>Estimate the change to your own home's electricity use, natural-gas use, and yearly energy bill from switching gas appliances to electric, with optional rooftop solar.</p>
         <div class="open">Open tool &rarr;</div>
       </div>
     </a>
@@ -108,6 +103,22 @@
         <div class="open">Open tool &rarr;</div>
       </div>
     </a>
+    </div>
+  </div>
+  <div class="group">
+    <div class="grouphead">For homeowners</div>
+    <div class="grid">
+    <a class="card" href="house.html">
+      <div class="accent" style="background:#5a9e6f"></div>
+      <div class="thumb"><canvas id="thumbHouse"></canvas></div>
+      <div class="body">
+        <div class="tag">For a single household</div>
+        <h2>Home Electrification Calculator</h2>
+        <p>Estimate the change to your own home's electricity use, natural-gas use, and yearly energy bill from switching gas appliances to electric, with optional rooftop solar.</p>
+        <div class="open">Open tool &rarr;</div>
+      </div>
+    </a>
+    </div>
   </div>
 
   <div class="about">
@@ -132,7 +143,7 @@
 </footer>
 
 <script>
-const T = {"proj":{"years":[2025,2030,2040,2050,2060,2070],"load":[63041,66126,73350,81054,90490,100560]},"house":[543,-860,-317],"dce":[61,89,71],"solar":[351,1549]};
+const T = {"proj":{"years":[2025,2030,2040,2050,2060,2070],"load":[63041,66126,73350,81054,90490,100560]},"house":[543,-860,-317],"dce":[61,89,71],"solar":[447,1946]};
 // static preview charts: no interaction, so clicks pass through to the card link
 const baseOpts = {responsive:true, maintainAspectRatio:false, animation:false, events:[],
   plugins:{legend:{display:false}, tooltip:{enabled:false}}};

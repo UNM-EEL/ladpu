@@ -123,14 +123,23 @@
     <p class="hint">How many households add rooftop solar.</p>
     <div id="adoptBox"></div>
 
-    <h2>2. Emission factor</h2>
-    <p class="hint">CO&#8322; per kWh of grid electricity avoided. Set your own, or pick a preset.</p>
-    <div class="ef-presets" id="efPresets">
-      <button data-ef="0.4487">PNM marginal 0.45</button>
-      <button data-ef="0.319">NM grid avg 0.32</button>
-      <button data-ef="0.0">Clean grid 0</button>
+    <h2>2. Carbon emission factor</h2>
+    <div class="toggle" id="methodToggle">
+      <button data-m="study" class="on">Study factors (hour&times;season)</button>
+      <button data-m="flat">Single flat factor</button>
     </div>
-    <div id="efBox"></div>
+    <p class="hint" id="studyNote" style="margin-top:8px">Avoided electricity is valued with the study's
+       PNM merit-order marginal factors, which vary by hour and season &mdash; the paper's preferred
+       estimate. Switch to a flat factor to use your own grid's single number.</p>
+    <div id="efWrap" style="display:none">
+      <p class="hint">CO&#8322; per kWh of grid electricity avoided. Set your own, or pick a preset.</p>
+      <div class="ef-presets" id="efPresets">
+        <button data-ef="0.4487">PNM marginal 0.45</button>
+        <button data-ef="0.319">NM grid avg 0.32</button>
+        <button data-ef="0.0">Clean grid 0</button>
+      </div>
+      <div id="efBox"></div>
+    </div>
 
     <details>
       <summary>Advanced</summary>
@@ -197,11 +206,14 @@
        realized carbon reduction is much smaller than a simple "generation times emission factor" would suggest.</p>
 
     <h3>Carbon</h3>
-    <p>Avoided grid electricity is converted to CO&#8322; with a <b>marginal emission factor</b> &mdash;
-       the emissions of the power plants that actually adjust output, following the regional grid's
-       dispatch. The default is about <b id="abEf"></b> kg CO&#8322;/kWh (PNM merit-order). The New Mexico
-       grid <em>average</em> is lower (0.319 kg/kWh); a coal-heavy grid would be much higher. Set the
-       factor for your grid. Natural gas is valued at 52.91 kg CO&#8322;/MMBtu (5.291 kg/therm).</p>
+    <p>Avoided grid electricity is converted to CO&#8322; with <b>marginal emission factors</b> &mdash;
+       the emissions of the power plants that actually adjust output. By default the tool uses the study's
+       factors that vary by <b>hour and season</b> (PNM merit-order dispatch, averaging about
+       <b id="abEf"></b> kg CO&#8322;/kWh), the paper's preferred estimate; because avoided solar power
+       lands in higher-emission daytime hours, this gives a larger offset (about 900 kg/home) than a flat
+       factor on the same kWh (about 706 kg). You can switch to a single flat factor for another grid
+       &mdash; the New Mexico grid <em>average</em> is lower (0.319 kg/kWh), a coal-heavy grid much higher.
+       Natural gas is valued at 52.91 kg CO&#8322;/MMBtu (5.291 kg/therm).</p>
 
     <h3>Limits</h3>
     <p>The grid effect is precisely estimated but the confidence interval is wide; winter is actually a
@@ -215,23 +227,26 @@
 </div>
 
 <script>
-const D = {"grid_kwh":1573,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_default":497,"n_meters":8646,"co2_home_report":977.9};
+const D = {"grid_kwh":1573,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_default":497,"n_meters":8646,"co2_elec_hs":899.87,"co2_theo_hs":3915.17};
 const fmt = n => Math.round(n).toLocaleString();
 const fmt1 = n => (Math.round(n*10)/10).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:1});
 
-function defaults(){ return {n:D.n_default, ef_elec:D.ef_elec, ef_gas:D.ef_gas, gas:1}; }
+function defaults(){ return {n:D.n_default, ef_elec:D.ef_elec, ef_gas:D.ef_gas, gas:1, method:"study"}; }
 let s = defaults();
 
 function compute(){
   const n = s.n;
   const loadMWh = n * D.grid_kwh / 1000;
   const gasTherms = n * D.gas_therms;
-  const co2_elec = n * D.grid_kwh * s.ef_elec;            // kg/yr
-  const co2_gas = s.gas ? n * D.gas_therms * s.ef_gas : 0; // kg/yr
+  const study = s.method === "study";
+  // electricity: study mode weights avoided kWh by hour x season marginal EFs (paper's preferred);
+  // flat mode applies a single user EF to the annual avoided kWh.
+  const co2_elec = study ? n * D.co2_elec_hs : n * D.grid_kwh * s.ef_elec;        // kg/yr
+  const co2_gas = s.gas ? n * D.gas_therms * s.ef_gas : 0;                         // kg/yr (constant combustion)
+  const theo_elec = study ? n * D.co2_theo_hs : n * D.gross_gen * s.ef_elec;       // 1:1 offset, no rebound
   const co2_t = (co2_elec + co2_gas) / 1000;             // metric tons/yr
-  const realized_elec_t = co2_elec / 1000;
-  const theo_elec_t = n * D.gross_gen * s.ef_elec / 1000; // if solar fully offset grid (no rebound/export)
-  return {n, loadMWh, gasTherms, co2_elec, co2_gas, co2_t, realized_elec_t, theo_elec_t};
+  return {n, loadMWh, gasTherms, co2_elec, co2_gas, co2_t,
+          realized_elec_t: co2_elec/1000, theo_elec_t: theo_elec/1000};
 }
 
 let co2Chart;
@@ -294,13 +309,21 @@ function buildControls(){
 document.querySelectorAll("#efPresets button").forEach(b=>b.addEventListener("click",()=>{
   s.ef_elec=parseFloat(b.dataset.ef); if(efInput) efInput.value=s.ef_elec; render();
 }));
+function applyMethodUI(){
+  document.getElementById("efWrap").style.display = s.method==="flat" ? "" : "none";
+  document.getElementById("studyNote").style.display = s.method==="flat" ? "none" : "";
+  document.querySelectorAll("#methodToggle button").forEach(x=>x.classList.toggle("on",x.dataset.m===s.method));
+}
+document.querySelectorAll("#methodToggle button").forEach(b=>b.addEventListener("click",()=>{
+  s.method=b.dataset.m; applyMethodUI(); render();
+}));
 document.querySelectorAll("#gasToggle button").forEach(b=>b.addEventListener("click",()=>{
   s.gas=parseInt(b.dataset.gas); document.querySelectorAll("#gasToggle button").forEach(x=>x.classList.toggle("on",x===b));
   render();
 }));
 document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
   document.querySelectorAll("#gasToggle button").forEach(x=>x.classList.toggle("on",x.dataset.gas==="1"));
-  buildControls(); render(); });
+  applyMethodUI(); buildControls(); render(); });
 
 // about + caveat numbers
 (function(){
