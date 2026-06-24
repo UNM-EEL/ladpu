@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Los Alamos Home Energy Projection</title>
+<title>Should I Switch? Los Alamos Home Electrification Calculator</title>
 <script>/**
  * Skipped minification because the original files appears to be already minified.
  * Original file: /npm/chart.js@4.4.1/dist/chart.umd.js
@@ -27,440 +27,352 @@
 </script>
 <style>
   :root{
-    --navy:#1f3864; --blue:#2e5496; --s1:#37618e; --s2a:#d98c3f; --s2b:#5a9e6f;
+    --navy:#1f3864; --blue:#2e5496; --elec:#37618e; --gas:#d98c3f; --save:#5a9e6f; --cost:#b5553f;
     --grey:#9aa7b4; --ink:#1c2530; --muted:#5b6776; --line:#e2e7ee; --bg:#f5f7fa; --card:#ffffff;
   }
   *{box-sizing:border-box}
-  html,body{overflow-x:hidden;max-width:100%}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-       color:var(--ink);background:var(--bg);line-height:1.5}
-  header{background:var(--navy);color:#fff;padding:20px 28px;display:flex;justify-content:space-between;
-         align-items:center;gap:18px;flex-wrap:wrap}
-  header h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.2px}
-  header p{margin:4px 0 0;font-size:13px;color:#c7d2e4;max-width:780px}
-  .about-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.42);color:#fff;
-             border-radius:9px;padding:10px 16px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap}
-  .about-btn:hover{background:rgba(255,255,255,.26)}
-  main{display:grid;grid-template-columns:330px minmax(0,1fr);gap:22px;padding:22px;align-items:start}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.5}
+  header{background:linear-gradient(110deg,var(--navy),var(--blue));color:#fff;padding:20px 22px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+  header h1{margin:0 0 6px;font-size:21px;font-weight:700}
+  header p{margin:0;font-size:13.5px;opacity:.92;max-width:760px}
+  .nav{display:flex;gap:8px;align-items:center;flex-shrink:0}
+  .nav a,.about-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.42);color:#fff;
+    border-radius:8px;padding:8px 12px;font-size:12.5px;cursor:pointer;text-decoration:none;font-family:inherit}
+  .nav a:hover,.about-btn:hover{background:rgba(255,255,255,.26)}
+  main{display:grid;grid-template-columns:340px minmax(0,1fr);gap:22px;padding:22px;align-items:start}
   main>*{min-width:0}
-  .grid2>*{min-width:0}
   @media(max-width:920px){
     main{grid-template-columns:1fr}
-    .controls{order:1}          /* scenario controls first on narrow screens */
+    .controls{order:1}            /* inputs first on narrow screens */
     main>section{order:2}
   }
   @media(max-width:600px){
-    header{padding:15px 16px}
-    header h1{font-size:18px}
-    header p{font-size:12.5px}
-    .about-btn{padding:8px 12px;font-size:12px}
-    main{padding:12px;gap:14px}
-    .panel{padding:13px 14px}
-    .cards{gap:9px;margin-bottom:14px}
-    .card{padding:11px 12px}
-    .card .v{font-size:19px}
-    .chartbox{height:300px}
-    .grid2 .chartbox{height:270px}
-    .modal{padding:18px 18px 22px}
+    header{padding:15px 16px} header h1{font-size:18px}
   }
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:18px 0 9px}
+  h2:first-of-type{margin-top:4px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
-         box-shadow:0 1px 2px rgba(20,40,80,.04)}
-  .controls h2{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);
-               margin:18px 0 10px;border-top:1px solid var(--line);padding-top:14px}
-  .controls h2:first-of-type{border-top:0;padding-top:0;margin-top:4px}
-  .scn-btns{display:flex;gap:8px;flex-wrap:wrap}
-  .scn-btn{flex:1;min-width:84px;border:1px solid var(--line);background:#fff;border-radius:9px;
-           padding:9px 8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);
-           text-align:center;transition:.12s}
-  .scn-btn .sub{display:block;font-weight:400;font-size:10.5px;color:#9aa7b4;margin-top:2px}
-  .scn-btn.active{border-color:var(--blue);color:var(--navy);background:#eef3fb;box-shadow:0 0 0 1px var(--blue) inset}
-  .ctl{margin:11px 0}
-  .ctl label{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px}
-  .ctl label b{color:var(--navy);font-variant-numeric:tabular-nums}
-  input[type=range]{width:100%;accent-color:var(--blue);height:4px}
-  .row4{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
-  .toggle{display:flex;gap:8px;align-items:center;margin-top:6px}
+    box-shadow:0 1px 2px rgba(20,40,80,.04)}
+  .controls .hint{font-size:12px;color:var(--muted);margin:-4px 0 8px}
+  .app{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);
+    border-radius:9px;margin-bottom:7px;cursor:pointer;background:#fff}
+  .app:hover{border-color:var(--blue)}
+  .app input{width:17px;height:17px;accent-color:var(--blue);cursor:pointer}
+  .app .nm{flex:1;font-size:14px}
+  .app .sw{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+  .app.off{opacity:.5}
+  .app.off .sw{visibility:hidden}
+  .solar{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--save);
+    border-radius:9px;background:#f1f7f3;cursor:pointer;margin-top:2px}
+  .solar input{width:17px;height:17px;accent-color:var(--save);cursor:pointer}
+  .solar .nm{flex:1;font-size:14px}
+  details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  summary{font-size:12.5px;color:var(--blue);cursor:pointer;user-select:none}
+  .num{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:7px 0;font-size:13px}
+  .num label{color:var(--muted)} .num .u{color:var(--muted);font-size:11.5px}
+  .num input{width:78px;text-align:right;border:1px solid var(--line);border-radius:6px;padding:5px 7px;
+    font-family:inherit;font-size:13px}
+  .toggle{display:flex;gap:6px;margin:6px 0 2px}
   .toggle button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;
-                 cursor:pointer;font-size:12px;font-weight:600;color:var(--muted)}
-  .toggle button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+    font-family:inherit;font-size:12.5px;cursor:pointer;color:var(--muted)}
+  .toggle button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
   .reset{margin-top:14px;width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;
-         padding:8px;cursor:pointer;font-size:12px;color:var(--muted)}
-  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-  @media(max-width:620px){.cards{grid-template-columns:repeat(2,1fr)}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
-  .card .k{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
-  .card .v{font-size:23px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;margin-top:3px}
-  .card .d{font-size:11.5px;color:var(--muted);margin-top:1px}
-  .chartwrap{position:relative;margin-bottom:16px}
-  .chartwrap h3{font-size:13.5px;margin:2px 0 8px;color:var(--ink);font-weight:600}
-  .chartbox{position:relative;height:320px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
-  .grid2 .chartbox{height:260px}
-  footer{padding:8px 28px 28px;color:var(--muted);font-size:12px;max-width:1000px}
+    padding:9px;font-family:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+  .reset:hover{background:#f0f3f8}
+  /* results */
+  .headline{display:grid;grid-template-columns:1fr;gap:0;margin-bottom:16px;text-align:center;
+    border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .headline .big{padding:20px 16px;background:var(--card)}
+  .headline .lab{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .headline .val{font-size:34px;font-weight:700;margin:4px 0 2px}
+  .headline .sub{font-size:13px;color:var(--muted)}
+  .val.save{color:var(--save)} .val.cost{color:var(--cost)}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  @media(max-width:620px){.cards{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .card .v{font-size:23px;font-weight:700;margin:5px 0 2px}
+  .card .d{font-size:12.5px;color:var(--muted)}
+  .v.elec{color:var(--elec)} .v.gas{color:var(--gas)} .v.sun{color:var(--save)}
+  .chartwrap h3{margin:0 0 8px;font-size:15px;font-weight:600}
+  .chartbox{position:relative;height:280px;width:100%}
+  footer{padding:16px 22px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line)}
   footer a{color:var(--blue)}
-  .hl{color:var(--navy);font-weight:600}
-  .modal-bg{display:none;position:fixed;inset:0;background:rgba(18,28,46,.55);z-index:50;padding:24px;overflow:auto}
-  .modal-bg.open{display:flex;align-items:flex-start;justify-content:center}
-  .modal{background:#fff;max-width:780px;width:100%;border-radius:14px;padding:22px 28px 26px;margin:auto;
-         box-shadow:0 24px 70px rgba(20,40,80,.35)}
-  .modal h2{margin:0;color:var(--navy);font-size:19px}
-  .modal h3{color:var(--navy);font-size:14px;margin:16px 0 5px}
-  .modal p,.modal li{font-size:13.5px;color:var(--ink);margin:5px 0}
-  .modal ul{margin:5px 0;padding-left:20px}
-  .modal .close{float:right;border:0;background:#eef3fb;border-radius:8px;padding:6px 13px;cursor:pointer;
-                font-size:13px;color:var(--navy);font-weight:600}
+  .hl{color:var(--ink);font-weight:600}
+  .modal-bg{position:fixed;inset:0;background:rgba(15,25,45,.45);display:none;z-index:30;padding:20px;overflow:auto}
+  .modal-bg.open{display:flex} .modal{background:#fff;max-width:680px;margin:auto;border-radius:14px;padding:24px 26px}
+  .modal h2{color:var(--ink);text-transform:none;letter-spacing:0;font-size:20px;margin:4px 0 10px}
+  .modal h3{font-size:15px;margin:16px 0 6px} .modal p,.modal li{font-size:13.5px;line-height:1.6}
+  .modal .close{float:right;border:0;background:#eef3fb;border-radius:8px;padding:6px 13px;cursor:pointer;font-family:inherit}
   .modal a{color:var(--blue)}
+  .disclaim{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic}
 </style>
 </head>
 <body>
 <header>
   <div>
-    <h1>Los Alamos Home Energy Projection, 2025&ndash;2070</h1>
-    <p>How much electricity and natural gas Los Alamos homes would use as households replace gas
-       appliances with electric ones. Pick a scenario and adjust the inputs; the chart updates instantly.
-       Shaded bands show the 95% uncertainty range.</p>
+    <h1>Should I Switch? &mdash; Home Electrification Calculator</h1>
+    <p>Estimate what happens to your electricity use, your natural-gas use, and your yearly bill if you
+       replace gas appliances with electric ones. Pick what you have, choose what to switch, and the
+       numbers update instantly. All rates are editable.</p>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
-    <a class="about-btn" href="house.html" style="text-decoration:none">For your home &rarr;</a>
-    <button class="about-btn" id="aboutBtn">&#9432;&nbsp; Assumptions &amp; methods</button>
+  <div class="nav">
+    <a href="index.html">&larr; County-wide projection</a>
+    <button class="about-btn" id="aboutBtn">&#9432;&nbsp; Assumptions</button>
   </div>
 </header>
 
 <main>
   <aside class="panel controls">
-    <h2>Choose a scenario</h2>
-    <div class="scn-btns" id="scnBtns">
-      <button class="scn-btn" data-scn="S1">Full phase-out<span class="sub">all-electric by 2070</span></button>
-      <button class="scn-btn" data-scn="S2a">Current intentions<span class="sub">only willing homes</span></button>
-      <button class="scn-btn" data-scn="S2b">End of life<span class="sub">switch when appliances fail</span></button>
-    </div>
-    <div class="toggle" id="fuelToggle">
-      <button data-fuel="gross" class="on">Without solar adoption</button>
-      <button data-fuel="net">With solar adoption</button>
-    </div>
+    <h2>1. Which gas appliances do you have?</h2>
+    <p class="hint">Check what runs on natural gas today, then check the box on the right to switch it to electric.</p>
+    <div id="appList"></div>
 
-    <h2>Settings</h2>
-    <div class="ctl"><label>Housing growth per year <b id="growthV"></b></label>
-      <input type="range" id="growth" min="0" max="1.5" step="0.1"></div>
+    <h2>2. Add rooftop solar?</h2>
+    <label class="solar"><input type="checkbox" id="solar">
+      <span class="nm">Install rooftop solar panels</span><span class="sw">typical home</span></label>
 
-    <h2>Full phase-out &middot; % of gas homes all-electric by</h2>
-    <div class="row4" id="s1Box"></div>
+    <details>
+      <summary>Adjust to your home (optional)</summary>
+      <p class="hint" style="margin-top:8px">Prefilled with the Los Alamos study averages. Change any value to match your home.</p>
+      <div id="usageBox"></div>
+    </details>
 
-    <h2>Rooftop solar &middot; % of homes with solar by</h2>
-    <div class="row4" id="solarBox"></div>
+    <details>
+      <summary>Electricity &amp; gas rates (editable)</summary>
+      <div class="toggle" id="rateToggle" style="margin-top:10px">
+        <button data-rate="tou" class="on">Time-of-use</button>
+        <button data-rate="flat">Flat rate</button>
+      </div>
+      <div id="rateBox"></div>
+    </details>
 
-    <h2>Voluntary scenarios &middot; share of homes willing to switch</h2>
-    <div class="row4" id="ceilBox"></div>
-
-    <h2>End-of-life scenario &middot; years until each appliance is replaced</h2>
-    <div class="row4" id="lifeBox"></div>
-
-    <button class="reset" id="reset">Restore default scenarios</button>
+    <button class="reset" id="reset">Restore defaults</button>
   </aside>
 
   <section>
+    <div class="headline">
+      <div class="big">
+        <div class="lab">Change to your yearly bill</div>
+        <div class="val" id="netVal">&mdash;</div>
+        <div class="sub" id="netSub"></div>
+      </div>
+    </div>
+
     <div class="cards" id="cards"></div>
+
     <div class="panel chartwrap">
-      <h3 id="loadTitle"></h3>
-      <div class="chartbox"><canvas id="loadChart"></canvas></div>
+      <h3>How the switch changes your annual bill</h3>
+      <div class="chartbox"><canvas id="billChart"></canvas></div>
     </div>
-    <div class="grid2">
-      <div class="panel chartwrap">
-        <h3 id="gasTitle"></h3>
-        <div class="chartbox"><canvas id="gasChart"></canvas></div>
-      </div>
-      <div class="panel chartwrap">
-        <h3 id="monTitle"></h3>
-        <div class="chartbox"><canvas id="monChart"></canvas></div>
-      </div>
-    </div>
+    <p class="disclaim" id="disclaim"></p>
   </section>
 </main>
 
 <footer>
-  Built from the household-anchored microsimulation in the LADPU zero-gas white paper (Part IV).
-  Baseline = actual 2024 metered consumption (<span class="hl" id="ftMeters"></span> meters,
-  <span class="hl" id="ftMWh"></span> MWh). Switching effects and 95% intervals come from the
-  Part-IV regressions; the solar overlay uses the Part-III grid ATT. This page reproduces the
-  delivered spreadsheet tool. &nbsp;|&nbsp;
-  <a href="https://github.com/UNM-EEL">UNM Energy Econ Lab</a>
+  Estimates from the LADPU zero-gas white paper: each switch uses the measured electricity-added and
+  gas-saved from the Part-IV household regressions; solar uses the Part-III grid effect. Rate defaults
+  from the <span class="hl">LADPU residential rate schedule</span> and are editable. This is a planning
+  estimate, not a bill quote. &nbsp;|&nbsp; <a href="https://github.com/UNM-EEL">UNM Energy Econ Lab</a>
 </footer>
 
 <div class="modal-bg" id="aboutModal">
   <div class="modal">
     <button class="close" id="aboutClose">Close &times;</button>
-    <h2>About these projections</h2>
-    <p>This tool projects how much electricity and natural gas Los Alamos homes would use through 2070
-       as households replace gas furnaces, water heaters, stoves, and dryers with electric versions. It
-       starts from what households <em>actually</em> used in 2024 (every residential meter) and adds the
-       measured effect of each switch.</p>
+    <h2>How this calculator works</h2>
+    <p>For each gas appliance you switch to electric, the tool adds the electricity that switch typically
+       uses and removes the natural gas it typically burns, then prices the difference with the LADPU
+       residential rates. The per-appliance numbers come from the same Los Alamos household data and
+       regressions used in the county-wide projection.</p>
 
-    <h3>The three scenarios</h3>
-    <ul>
-      <li><b>Full phase-out by 2070:</b> the pace needed to end residential gas by the county's 2070 goal.
-          Homes go all-electric on a fixed schedule (10% of gas homes by 2030, rising to 100% by 2070).
-          This is a planning path, not a forecast of what households will choose.</li>
-      <li><b>Current intentions only:</b> only the households who told the resident survey they are
-          &ldquo;very likely&rdquo; to switch each appliance actually do, on the timing they stated. The
-          rest keep gas, so progress levels off well short of full electrification.</li>
-      <li><b>Switch at end of life:</b> the willing households switch early; everyone else switches when a
-          gas appliance wears out (about one appliance-lifetime per year). Most homes end up electric over
-          time without anyone scrapping working equipment.</li>
-    </ul>
+    <h3>Typical per-appliance effect (per year, editable)</h3>
+    <ul id="aboutApp"></ul>
+    <p>Space-heating use varies the most between homes, so its electricity is scaled to the gas you enter
+       under &ldquo;Adjust to your home.&rdquo; A heat pump for space or water heating is assumed; the
+       added electricity already reflects that efficiency, not plain resistance heating.</p>
 
-    <h3>With vs. without solar adoption</h3>
-    <p>The toggle adds a rooftop-solar overlay that follows the adoption path you set with the decade
-       markers (defaulting to about 40% of homes by 2050). Solar lowers
-       the electricity a home buys from the grid (by the measured 131 kWh per month per solar home) and
-       slightly lowers gas use. &ldquo;Without solar adoption&rdquo; shows total household use;
-       &ldquo;with solar adoption&rdquo; shows what the utility would actually need to supply.</p>
+    <h3>Rooftop solar</h3>
+    <p>Adding solar lowers the electricity you buy from the grid by about <b id="aboutSolar"></b> kWh per
+       year for a typical Los Alamos system (the measured average), valued at the off-peak rate because
+       panels generate mostly midday. You can change this figure.</p>
 
-    <h3>The numbers behind the tool</h3>
-    <ul>
-      <li>Baseline: 8,646 residential meters; about 62,400 MWh of electricity and 5.76 million therms of
-          gas in 2024; 6,906 homes heat with gas.</li>
-      <li>Each switch adds the electricity and removes the gas measured in the white paper's regressions.
-          Electric space heating adds load mostly in winter, which is why the winter peak grows fastest.</li>
-      <li>The shaded bands are 95% confidence ranges from the statistical uncertainty in those measured
-          effects. They do not capture how fast households actually act &mdash; that is what the three
-          scenarios are for.</li>
-    </ul>
+    <h3>Rates</h3>
+    <p>LADPU is moving to <b>time-of-use</b> pricing: electricity costs more during peak hours and less
+       off-peak. New heating and water-heating load is split between peak and off-peak using the
+       &ldquo;peak share&rdquo; you set. You can switch to a single flat rate instead. If you switch
+       <em>every</em> gas appliance, the tool also removes the fixed monthly gas service charge, since
+       you could disconnect gas entirely.</p>
 
-    <h3>What it does and does not capture</h3>
-    <p>The projection is monthly, so it bounds winter <em>energy</em> rather than the hourly peak in
-       megawatts. Forward years hold 2024 weather fixed. Appliance ownership for the minor end uses is
-       assigned from survey shares rather than per home.</p>
-    <p>Full methodology, data sources, and results are in the LADPU zero-gas white paper.
+    <h3>What it does not capture</h3>
+    <p>Up-front equipment and installation cost, federal or state tax credits, financing, and future rate
+       changes are not included &mdash; this shows the change in <em>annual energy bills</em> only.
+       Actual results depend on your home, equipment, and habits.</p>
+    <p>Full methodology and data are in the LADPU zero-gas white paper.
        <a href="https://github.com/UNM-EEL">UNM Energy Econ Lab on GitHub &rarr;</a></p>
   </div>
 </div>
 
 <script>
-const BLOCKS = {"months":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"base_E":[5916.919500900151,5434.72171106832,5162.161988197863,4373.161029254376,4383.44454276507,5600.483839160996,6270.796222180467,6069.694487626994,4194.375513633251,3974.5070813371553,4976.759674862556,6078.246264878623],"base_G_total":5759184.597343095,"dE_month":{"space":[0.216182867300212,0.18715756563159602,0.18662224467466001,0.10156364743757999,0.037178594017144004,-0.0124223530833,-0.028747328550687887,-0.0234804654662459,-0.003301202966670001,0.06903713461864079,0.1833571718328408,0.218040798216],"water":[0.13261799999999999,0.11978399999999999,0.13261799999999999,0.12833999999999998,0.13261799999999999,0.12833999999999998,0.13261799999999999,0.13261799999999999,0.12833999999999998,0.13261799999999999,0.12833999999999998,0.13261799999999999],"cooking":[0.045600999999999996,0.041188,0.045600999999999996,0.04413,0.045600999999999996,0.04413,0.045600999999999996,0.045600999999999996,0.04413,0.045600999999999996,0.04413,0.045600999999999996],"dryer":[0.044268,0.03998399999999999,0.044268,0.042839999999999996,0.044268,0.042839999999999996,0.044268,0.044268,0.042839999999999996,0.044268,0.042839999999999996,0.044268]},"dE_se_m":{"space":[0.04006697661281064,0.031066887777341557,0.030959978787182724,0.016831871457929855,0.008399084344235771,0.010562512612708014,0.021486592209548547,0.015173876054523364,0.005627254885124578,0.01194295856408839,0.03160350885122992,0.042969666833714004],"water":[0.05325799999999999,0.048104,0.05325799999999999,0.05154,0.05325799999999999,0.05154,0.05325799999999999,0.05325799999999999,0.05154,0.05325799999999999,0.05154,0.05325799999999999],"cooking":[0.027683,0.025004000000000002,0.027683,0.026789999999999998,0.027683,0.026789999999999998,0.027683,0.027683,0.026789999999999998,0.027683,0.026789999999999998,0.027683],"dryer":[0.030038999999999996,0.027131999999999996,0.030038999999999996,0.02907,0.030038999999999996,0.02907,0.030038999999999996,0.030038999999999996,0.02907,0.030038999999999996,0.02907,0.030038999999999996]},"dG_se_m":{"space":[6.4481799894517104,4.549999683775672,4.325739531977036,2.2005693179138035,1.0467050293697986,0.6421869090216775,1.246110295085805,0.8984125621648134,0.37792894523538645,1.5396070962387178,4.528472331390128,6.367398553471814],"water":[4.805,4.34,4.805,4.65,4.805,4.65,4.805,4.805,4.65,4.805,4.65,4.805],"cooking":[2.5420000000000003,2.2960000000000003,2.5420000000000003,2.46,2.5420000000000003,2.46,2.5420000000000003,2.5420000000000003,2.46,2.5420000000000003,2.46,2.5420000000000003],"dryer":[2.759,2.492,2.759,2.67,2.759,2.67,2.759,2.759,2.67,2.759,2.67,2.759]},"N":{"space":6906.0,"water":6452.838,"cooking":4530.564,"dryer":1793.646},"total_space_gas":4289669.578642531,"total_nonspace_gas":1469515.0187005633,"gas_share_app":{"water":0.7495104845174964,"cooking":0.18094688553292582,"dryer":0.06954262994957777},"n_meters":8646,"params":{"BASE_YEAR":2024,"END_YEAR":2070,"GROWTH":0.004,"S1_MILE":{"2024":0.0,"2030":0.1,"2040":0.3,"2050":0.5,"2060":0.75,"2070":1.0},"CEIL":{"space":0.482,"water":0.603,"cooking":0.42,"dryer":0.194},"ANYPLAN":0.263,"S2_TIMING":{"0":0.0,"1":0.22015209125475285,"3":0.4745247148288973,"5":0.7231939163498098,"10":1.0},"LIFE":{"space":18,"water":12,"cooking":15,"dryer":13},"SOLAR_BASE":497,"SOLAR_TGT_SHARE":0.4,"SOLAR_TGT_YR":2050,"SOLAR_GRID":-1.573404,"SOLAR_GRID_SE":0.498876,"SOLAR_GAS":28.439999999999998,"SOLAR_GAS_SE":10.14,"Z":1.96}};
-const P = BLOCKS.params, EU = ["space","water","cooking","dryer"], MONTHS = BLOCKS.months;
-const base_E = BLOCKS.base_E, base_E_ann = base_E.reduce((a,b)=>a+b,0), base_E_jan = base_E[0];
-const base_G = BLOCKS.base_G_total, n_meters = BLOCKS.n_meters, Z = P.Z;
-const dE = BLOCKS.dE_month, dEse = BLOCKS.dE_se_m, dGse = BLOCKS.dG_se_m, N = BLOCKS.N;
-const gas_space = BLOCKS.total_space_gas, gas_nonspace = BLOCKS.total_nonspace_gas, gsh = BLOCKS.gas_share_app;
-const COL = {S1:"#37618e", S2a:"#d98c3f", S2b:"#5a9e6f", base:"#9aa7b4"};
-const NAME = {S1:"Full phase-out by 2070", S2a:"Current intentions only", S2b:"Switch at end of life"};
+const D = {"KWH":{"space":1131,"water":1561,"cooking":537,"dryer":521},"THERMS":{"space":621.2,"water":170.7,"cooking":58.7,"dryer":57.0},"SOLAR_KWH":1573,"RATES":{"tou_peak":0.197,"tou_off":0.11,"peak_share":0.4,"flat":0.15,"gas_therm":0.77,"gas_service":13.45}};
+const EU = ["space","water","cooking","dryer"];
 const LBL = {space:"Space heating", water:"Water heater", cooking:"Cooking range", dryer:"Clothes dryer"};
 const fmt = n => Math.round(n).toLocaleString();
+const money = n => (n<0?"−$":"$") + Math.abs(Math.round(n)).toLocaleString();
 
 function defaults(){
-  const s1 = {}; Object.keys(P.S1_MILE).forEach(y=>s1[y]=P.S1_MILE[y]);
-  const baseShare = P.SOLAR_BASE/n_meters, sp = {};   // default solar path = the ramp to 40% by 2050, snapped to 5%
-  [2030,2040,2050,2060,2070].forEach(yr=>{
-    const t = Math.min(yr, P.SOLAR_TGT_YR);
-    const v = baseShare + (t-P.BASE_YEAR)/(P.SOLAR_TGT_YR-P.BASE_YEAR)*(P.SOLAR_TGT_SHARE-baseShare);
-    sp[yr] = Math.round(v*20)/20;
-  });
-  return {growth:P.GROWTH, solar_base:P.SOLAR_BASE, solar_grid:P.SOLAR_GRID, solar_grid_se:P.SOLAR_GRID_SE,
-    solar_gas:P.SOLAR_GAS, solar_gas_se:P.SOLAR_GAS_SE,
-    s1:s1, solarPath:sp, ceil:Object.assign({},P.CEIL), life:Object.assign({},P.LIFE)};
+  return {
+    have: {space:true, water:true, cooking:true, dryer:true},   // typical gas home
+    sw:   {space:true, water:true, cooking:true, dryer:true},
+    solar:false, rate:"tou",
+    kwh: Object.assign({}, D.KWH), therms: Object.assign({}, D.THERMS), solar_kwh: D.SOLAR_KWH,
+    R: Object.assign({}, D.RATES),
+  };
 }
-let pr = defaults(), focus = "S1", fuel = "gross";
+let s = defaults();
 
-function interp(xs, ys, q){
-  if(q<=xs[0]) return ys[0];
-  if(q>=xs[xs.length-1]) return ys[ys.length-1];
-  for(let i=0;i<xs.length-1;i++) if(xs[i]<=q && q<=xs[i+1])
-    return ys[i] + (q-xs[i])/(xs[i+1]-xs[i])*(ys[i+1]-ys[i]);
-}
-const s2t_t = Object.keys(P.S2_TIMING).map(Number).sort((a,b)=>a-b);
-const s2t_f = s2t_t.map(t=>P.S2_TIMING[t]);
-
-function paces(scn, y){
-  const t = y - P.BASE_YEAR;
-  if(scn==="S1"){
-    const xs = Object.keys(pr.s1).map(Number).sort((a,b)=>a-b), ys = xs.map(x=>pr.s1[x]);
-    const v = interp(xs, ys, y); return {space:v,water:v,cooking:v,dryer:v};
-  }
-  const f = interp(s2t_t, s2t_f, t), o = {};
-  if(scn==="S2a"){ EU.forEach(k=>o[k]=pr.ceil[k]*f); return o; }
-  EU.forEach(k=>o[k]=pr.ceil[k]*f + (1-pr.ceil[k])*(1-Math.exp(-t/pr.life[k]))); return o;
-}
-function solarHomes(y){
-  const bs = pr.solar_base/n_meters, sp = pr.solarPath;
-  return interp([P.BASE_YEAR,2030,2040,2050,2060,2070],
-    [bs, sp[2030], sp[2040], sp[2050], sp[2060], sp[2070]].map(s=>s*n_meters), y);
-}
-function project(scn){
-  const o = {year:[],load:[],loadLo:[],loadHi:[],net:[],netLo:[],netHi:[],
-             gas:[],gasLo:[],gasHi:[],gasNet:[],gasNetLo:[],gasNetHi:[],jan:[]};
-  let mon2070 = null;
-  for(let y=P.BASE_YEAR;y<=P.END_YEAR;y++){
-    const g = Math.pow(1+pr.growth, y-P.BASE_YEAR), pk = paces(scn,y);
-    const lm = new Array(12).fill(0); let varE=0, varG=0;
-    for(let m=0;m<12;m++){
-      let am=0; EU.forEach(k=>{ am += pk[k]*N[k]*dE[k][m];
-        varE += Math.pow(pk[k]*N[k]*dEse[k][m],2); varG += Math.pow(pk[k]*N[k]*dGse[k][m],2); });
-      lm[m] = (base_E[m]+am)*g;
+// ---- model ----
+function compute(){
+  let addKwh=0, savedTherms=0;
+  EU.forEach(k=>{
+    if(s.have[k] && s.sw[k]){
+      // space-heat electricity scales with the home's heating gas; appliance deltas are flat
+      const scale = (k==="space") ? (s.therms.space / D.THERMS.space) : 1;
+      addKwh += s.kwh[k]*scale;
+      savedTherms += s.therms[k];
     }
-    const seE = Math.sqrt(varE)*g, load = lm.reduce((a,b)=>a+b,0);
-    const frac = (pk.space*gas_space + (pk.water*gsh.water+pk.cooking*gsh.cooking+pk.dryer*gsh.dryer)*gas_nonspace)/base_G;
-    const gas = base_G*g*Math.max(0,1-frac), seG = Math.sqrt(varG)*g;
-    const inc = Math.max(0, solarHomes(y)-pr.solar_base);
-    const net = load - inc*(-pr.solar_grid), seN = Math.sqrt(seE*seE + Math.pow(inc*pr.solar_grid_se,2));
-    const fg = g ? gas/(base_G*g) : 0, gasNet = Math.max(0, gas - inc*pr.solar_gas*fg);
-    const seGN = Math.sqrt(seG*seG + Math.pow(inc*pr.solar_gas_se*fg,2));
-    o.year.push(y); o.load.push(load); o.loadLo.push(load-Z*seE); o.loadHi.push(load+Z*seE);
-    o.net.push(net); o.netLo.push(net-Z*seN); o.netHi.push(net+Z*seN);
-    o.gas.push(gas/1e6); o.gasLo.push(Math.max(0,gas-Z*seG)/1e6); o.gasHi.push(Math.min(base_G*g,gas+Z*seG)/1e6);
-    o.gasNet.push(gasNet/1e6); o.gasNetLo.push(Math.max(0,gasNet-Z*seGN)/1e6); o.gasNetHi.push(Math.min(base_G*g,gasNet+Z*seGN)/1e6);
-    o.jan.push(lm[0]); if(y===P.END_YEAR) mon2070 = lm.slice();
-  }
-  o.mon2070 = mon2070; return o;
-}
-function baseline(){
-  const o={year:[],load:[],gas:[]};
-  for(let y=P.BASE_YEAR;y<=P.END_YEAR;y++){ const g=Math.pow(1+pr.growth,y-P.BASE_YEAR);
-    o.year.push(y); o.load.push(base_E_ann*g); o.gas.push(base_G*g/1e6); }
-  return o;
-}
-
-// ---- charts ----
-const START = 1;  // display from 2025
-let loadChart, gasChart, monChart;
-const band = (data, color) => ({data, borderColor:"transparent", backgroundColor:color,
-  pointRadius:0, fill:"-1", tension:.25, order:5});
-const line = (data, color, w, dash) => ({data, borderColor:color, backgroundColor:color, borderWidth:w,
-  borderDash:dash||[], pointRadius:0, tension:.25, fill:false, order:1});
-
-function trajDatasets(R, B0, isGas){
-  const sl = a => a.slice(START);
-  const key = isGas ? (fuel==="net"?"gasNet":"gas") : (fuel==="net"?"net":"load");
-  const lo  = isGas ? (fuel==="net"?"gasNetLo":"gasLo") : (fuel==="net"?"netLo":"loadLo");
-  const hi  = isGas ? (fuel==="net"?"gasNetHi":"gasHi") : (fuel==="net"?"netHi":"loadHi");
-  const f = R[focus];
-  const ds = [
-    {label:focus+" 95% CI", data:sl(f[lo]), borderColor:"transparent", pointRadius:0, fill:false, tension:.25, order:6},
-    Object.assign({label:"_band", data:sl(f[hi])}, band(sl(f[hi]), COL[focus]+"22")),
-    Object.assign({label:"Baseline", data:sl(B0[isGas?"gas":"load"])}, line(sl(B0[isGas?"gas":"load"]), COL.base, 1.5, [6,4])),
-  ];
-  ["S1","S2a","S2b"].forEach(s=>{
-    ds.push(Object.assign({label:NAME[s]}, line(sl(R[s][key]), COL[s], s===focus?3:1.8)));
   });
-  return ds;
-}
-function mkChart(ctx, yTitle){
-  return new Chart(ctx, {type:"line", data:{labels:[],datasets:[]},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:"index",intersect:false},
-      scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8,color:"#5b6776"}},
-              y:{title:{display:true,text:yTitle,color:"#5b6776"},grid:{color:"#eef1f5"},ticks:{color:"#5b6776",
-                 callback:v=>v.toLocaleString()}}},
-      plugins:{legend:{labels:{filter:i=>!i.text.startsWith("_")&&!i.text.endsWith("95% CI"),
-                 usePointStyle:true,pointStyle:"line",boxWidth:26,color:"#1c2530",font:{size:12}}},
-               tooltip:{filter:i=>!i.dataset.label.startsWith("_")&&!i.dataset.label.endsWith("95% CI")}}}});
-}
-function monDatasets(R){
-  const f = R[focus], cur = base_E.map(x=>x), nxt = f.mon2070;
-  return [
-    Object.assign({label:"Today (2025)"}, line(cur, COL.base, 1.8, [6,4])),
-    Object.assign({label:"2070 projection"}, line(nxt, COL[focus], 2.6)),
-  ];
+  const solarKwh = s.solar ? s.solar_kwh : 0;
+  const eAdd = s.rate==="tou" ? (s.R.peak_share*s.R.tou_peak + (1-s.R.peak_share)*s.R.tou_off) : s.R.flat;
+  const eSolar = s.rate==="tou" ? s.R.tou_off : s.R.flat;   // solar offsets midday ~ off-peak
+  const addElecCost = addKwh * eAdd;
+  const solarSave = solarKwh * eSolar;
+  let gasSave = savedTherms * s.R.gas_therm;
+  // full electrification: no gas appliances remain -> drop the monthly gas service charge
+  const ownGas = EU.filter(k=>s.have[k]);
+  const allSwitched = ownGas.length>0 && ownGas.every(k=>s.sw[k]);
+  const serviceSave = allSwitched ? s.R.gas_service*12 : 0;
+  const net = addElecCost - gasSave - serviceSave - solarSave;   // >0 bill up, <0 saving
+  return {addKwh, savedTherms, solarKwh, addElecCost, gasSave, serviceSave, solarSave, net, allSwitched};
 }
 
-function recompute(){
-  const R = {S1:project("S1"), S2a:project("S2a"), S2b:project("S2b")}, B0 = baseline();
-  const yrs = R.S1.year.slice(START);
-  if(loadChart){
-    loadChart.data.labels = yrs; loadChart.data.datasets = trajDatasets(R,B0,false); loadChart.update();
-    gasChart.data.labels = yrs;  gasChart.data.datasets  = trajDatasets(R,B0,true);  gasChart.update();
-    monChart.data.labels = MONTHS; monChart.data.datasets = monDatasets(R); monChart.update();
-  }
+// ---- render ----
+let billChart;
+function render(){
+  const c = compute();
+  // headline
+  const nv = document.getElementById("netVal"), ns = document.getElementById("netSub");
+  if(c.net < 0){ nv.className="val save"; nv.textContent = money(-c.net)+" saved / year";
+    ns.textContent = "Your energy bill goes down."; }
+  else if(c.net > 0){ nv.className="val cost"; nv.textContent = money(c.net)+" more / year";
+    ns.textContent = "Your energy bill goes up at current rates."; }
+  else { nv.className="val"; nv.textContent = "No change"; ns.textContent=""; }
 
-  const f = R[focus], i = f.year.length-1;
-  const load = fuel==="net"?f.net[i]:f.load[i], gas2070pct = f.gas[i]/(base_G/1e6)*100;
-  const inc = (load/base_E_ann - 1)*100;
   document.getElementById("cards").innerHTML = [
-    card("Electricity use in 2070", fmt(load)+" MWh", (inc>=0?"+":"")+inc.toFixed(0)+"% vs today"),
-    card("Winter peak (January)", fmt(f.jan[i])+" MWh", "+"+((f.jan[i]/base_E_jan-1)*100).toFixed(0)+"% vs today"),
-    card("Natural gas still used", gas2070pct.toFixed(0)+"%", "of today's gas, in 2070"),
-    card("With rooftop solar", fmt(f.net[i])+" MWh", fmt(f.load[i]-f.net[i])+" MWh less from the grid"),
+    `<div class="card"><div class="k">Electricity</div><div class="v elec">+${fmt(c.addKwh)} kWh</div><div class="d">more per year &middot; +${money(c.addElecCost)}/yr</div></div>`,
+    `<div class="card"><div class="k">Natural gas</div><div class="v gas">−${fmt(c.savedTherms)} therms</div><div class="d">saved per year &middot; −${money(c.gasSave+c.serviceSave)}/yr</div></div>`,
+    c.solarKwh>0
+      ? `<div class="card"><div class="k">Rooftop solar</div><div class="v sun">−${fmt(c.solarKwh)} kWh</div><div class="d">from the grid &middot; −${money(c.solarSave)}/yr</div></div>`
+      : `<div class="card"><div class="k">Rooftop solar</div><div class="v">&mdash;</div><div class="d">not included</div></div>`,
   ].join("");
-  const fuelTxt = fuel==="net" ? " (with solar adoption)" : " (without solar adoption)";
-  document.getElementById("loadTitle").textContent = "Household electricity use, 2025–2070"+fuelTxt;
-  document.getElementById("gasTitle").textContent  = "Household natural gas use (million therms)"+fuelTxt;
-  document.getElementById("monTitle").textContent  = "Electricity use by month — "+NAME[focus]+", 2070 vs today";
+
+  const dl = document.getElementById("disclaim");
+  dl.textContent = c.allSwitched
+    ? "All gas appliances switched: the fixed monthly gas service charge is removed (you could disconnect gas)."
+    : "Some gas appliances remain, so the gas service charge still applies.";
+
+  // bar chart: cost components (added electric up; gas, service, solar down) and the net
+  const labels = ["Electricity\nadded","Gas\nsaved","Gas service\nsaved","Solar\nsaved","Net\nchange"];
+  const vals = [c.addElecCost, -c.gasSave, -c.serviceSave, -c.solarSave, c.net];
+  const colors = ["#37618e","#d98c3f","#caa15a","#5a9e6f", c.net<0?"#5a9e6f":"#b5553f"];
+  if(billChart){
+    billChart.data.labels = labels;
+    billChart.data.datasets = [{data:vals, backgroundColor:colors, borderRadius:5,
+      borderWidth:0, maxBarThickness:64}];
+    billChart.update();
+  }
 }
-const card = (k,v,d) => `<div class="card"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
 
 // ---- controls ----
-function slider(box, key, label, min, max, step, get, set, unit){
-  const id = key, wrap = document.createElement("div"); wrap.className="ctl";
-  wrap.innerHTML = `<label>${label} <b id="${id}V"></b></label>
-    <input type="range" id="${id}" min="${min}" max="${max}" step="${step}">`;
-  box.appendChild(wrap);
-  const inp = wrap.querySelector("input"), out = wrap.querySelector("b");
-  const show = ()=>out.textContent = get().toFixed(unit==="%"?0:(step<1?2:0))+(unit||"");
-  inp.value = get(); show();
-  inp.addEventListener("input", ()=>{ set(parseFloat(inp.value)); show(); recompute(); });
-  return {inp, show};
-}
-let globalsWired = false;
-function wireGlobals(){
-  const g=document.getElementById("growth");
-  g.addEventListener("input",()=>{pr.growth=parseFloat(g.value)/100; document.getElementById("growthV").textContent=(pr.growth*100).toFixed(1)+"%/yr"; recompute();});
-}
-const YEARS_M = [2030,2040,2050,2060,2070];
-function buildDecadeMarkers(boxId, store){
-  // monotonic decade markers: a cumulative share that can only rise over time (phase-out and solar)
-  const box = document.getElementById(boxId); box.innerHTML = ""; const els = {};
-  YEARS_M.forEach(yr=>{
-    const wrap = document.createElement("div"); wrap.className = "ctl";
-    wrap.innerHTML = '<label>by '+yr+' <b></b></label><input type="range" min="0" max="100" step="5">';
-    box.appendChild(wrap);
-    const inp = wrap.querySelector("input"), out = wrap.querySelector("b"); els[yr] = {inp, out};
-    inp.value = store[yr]*100; out.textContent = Math.round(store[yr]*100)+"%";
-    inp.addEventListener("input", ()=>{
-      const v = parseFloat(inp.value)/100; store[yr] = v;
-      YEARS_M.forEach(y2=>{ if(y2<yr && store[y2]>v) store[y2]=v;     // earlier decades cannot exceed this one
-                            if(y2>yr && store[y2]<v) store[y2]=v; }); // later decades cannot fall below it
-      YEARS_M.forEach(y2=>{ els[y2].inp.value=store[y2]*100; els[y2].out.textContent=Math.round(store[y2]*100)+"%"; });
-      recompute();
-    });
+function buildApps(){
+  const box = document.getElementById("appList"); box.innerHTML="";
+  EU.forEach(k=>{
+    const row = document.createElement("label"); row.className="app"+(s.have[k]?"":" off");
+    row.innerHTML = `<input type="checkbox" class="have" ${s.have[k]?"checked":""}>
+      <span class="nm">${LBL[k]}</span>
+      <span class="sw"><input type="checkbox" class="sw" ${s.sw[k]?"checked":""}> switch to electric</span>`;
+    box.appendChild(row);
+    const [have, sw] = row.querySelectorAll("input");
+    have.addEventListener("change",()=>{ s.have[k]=have.checked; if(!have.checked) s.sw[k]=false;
+      else s.sw[k]=true; buildApps(); render(); });
+    sw.addEventListener("change",(e)=>{ e.stopPropagation(); s.sw[k]=sw.checked; render(); });
+    sw.addEventListener("click",e=>e.stopPropagation());
   });
 }
-function buildControls(){
-  syncGlobals();
-  if(!globalsWired){ wireGlobals(); globalsWired = true; }
-  buildDecadeMarkers("s1Box", pr.s1);
-  buildDecadeMarkers("solarBox", pr.solarPath);
-  const cB=document.getElementById("ceilBox"); cB.innerHTML="";
-  EU.forEach(k=>slider(cB,"c_"+k,LBL[k],0,100,1,()=>pr.ceil[k]*100,v=>pr.ceil[k]=v/100,"%"));
-  const lB=document.getElementById("lifeBox"); lB.innerHTML="";
-  EU.forEach(k=>slider(lB,"l_"+k,LBL[k],5,30,1,()=>pr.life[k],v=>pr.life[k]=v,""));
+function numRow(box, label, unit, get, set, step){
+  const r=document.createElement("div"); r.className="num";
+  r.innerHTML=`<label>${label}</label><span><input type="number" step="${step}"><span class="u"> ${unit}</span></span>`;
+  box.appendChild(r);
+  const inp=r.querySelector("input"); inp.value=get();
+  inp.addEventListener("input",()=>{ const v=parseFloat(inp.value); if(!isNaN(v)){set(v); render();} });
 }
-function syncGlobals(){
-  document.getElementById("growth").value=pr.growth*100; document.getElementById("growthV").textContent=(pr.growth*100).toFixed(1)+"%/yr";
+function buildUsage(){
+  const box=document.getElementById("usageBox"); box.innerHTML="";
+  EU.forEach(k=>numRow(box, LBL[k]+" gas", "therms/yr", ()=>s.therms[k], v=>s.therms[k]=v, 1));
+  numRow(box, "Solar grid offset", "kWh/yr", ()=>s.solar_kwh, v=>s.solar_kwh=v, 50);
+}
+function buildRates(){
+  const box=document.getElementById("rateBox"); box.innerHTML="";
+  if(s.rate==="tou"){
+    numRow(box,"Peak price","$/kWh",()=>s.R.tou_peak,v=>s.R.tou_peak=v,0.001);
+    numRow(box,"Off-peak price","$/kWh",()=>s.R.tou_off,v=>s.R.tou_off=v,0.001);
+    numRow(box,"New load in peak hours","share 0-1",()=>s.R.peak_share,v=>s.R.peak_share=v,0.05);
+  } else {
+    numRow(box,"Electricity price","$/kWh",()=>s.R.flat,v=>s.R.flat=v,0.001);
+  }
+  numRow(box,"Natural gas price","$/therm",()=>s.R.gas_therm,v=>s.R.gas_therm=v,0.01);
+  numRow(box,"Gas service charge","$/month",()=>s.R.gas_service,v=>s.R.gas_service=v,0.5);
 }
 
-document.querySelectorAll(".scn-btn").forEach(b=>b.addEventListener("click",()=>{
-  focus=b.dataset.scn; document.querySelectorAll(".scn-btn").forEach(x=>x.classList.toggle("active",x===b)); recompute();
+document.getElementById("solar").addEventListener("change",e=>{ s.solar=e.target.checked; render(); });
+document.querySelectorAll("#rateToggle button").forEach(b=>b.addEventListener("click",()=>{
+  s.rate=b.dataset.rate; document.querySelectorAll("#rateToggle button").forEach(x=>x.classList.toggle("on",x===b));
+  buildRates(); render();
 }));
-document.querySelectorAll("#fuelToggle button").forEach(b=>b.addEventListener("click",()=>{
-  fuel=b.dataset.fuel; document.querySelectorAll("#fuelToggle button").forEach(x=>x.classList.toggle("on",x===b)); recompute();
-}));
-document.getElementById("reset").addEventListener("click",()=>{ pr=defaults(); buildControls(); recompute(); });
+document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
+  document.getElementById("solar").checked=false;
+  document.querySelectorAll("#rateToggle button").forEach(x=>x.classList.toggle("on",x.dataset.rate==="tou"));
+  buildApps(); buildUsage(); buildRates(); render(); });
 
-// ---- init ----
-document.querySelector('.scn-btn[data-scn="S1"]').classList.add("active");
-document.getElementById("ftMeters").textContent = n_meters.toLocaleString();
-document.getElementById("ftMWh").textContent = fmt(base_E_ann);
-const modal = document.getElementById("aboutModal");
-document.getElementById("aboutBtn").addEventListener("click", ()=>modal.classList.add("open"));
-document.getElementById("aboutClose").addEventListener("click", ()=>modal.classList.remove("open"));
-modal.addEventListener("click", e=>{ if(e.target===modal) modal.classList.remove("open"); });
-buildControls();                                   // sliders first, so they render even if charts fail
+// about modal
+(function(){
+  const ul=document.getElementById("aboutApp");
+  ul.innerHTML = EU.map(k=>`<li><b>${LBL[k]}:</b> +${fmt(D.KWH[k])} kWh/yr electricity, −${fmt(D.THERMS[k])} therms/yr gas.</li>`).join("");
+  document.getElementById("aboutSolar").textContent = fmt(D.SOLAR_KWH);
+})();
+const modal=document.getElementById("aboutModal");
+document.getElementById("aboutBtn").addEventListener("click",()=>modal.classList.add("open"));
+document.getElementById("aboutClose").addEventListener("click",()=>modal.classList.remove("open"));
+modal.addEventListener("click",e=>{ if(e.target===modal) modal.classList.remove("open"); });
+
+// init
+buildApps(); buildUsage(); buildRates();
 if(typeof Chart !== "undefined"){
-  loadChart=mkChart(document.getElementById("loadChart"),"MWh / year");
-  gasChart =mkChart(document.getElementById("gasChart"),"Million therms / yr");
-  monChart =mkChart(document.getElementById("monChart"),"MWh / month");
-  window.addEventListener("orientationchange", ()=>setTimeout(()=>{ [loadChart,gasChart,monChart].forEach(c=>c.resize()); }, 250));
+  billChart = new Chart(document.getElementById("billChart"), {
+    type:"bar",
+    data:{labels:[],datasets:[]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>(c.raw<0?"−$":"$")+Math.abs(Math.round(c.raw)).toLocaleString()+"/yr"}}},
+      scales:{x:{grid:{display:false},ticks:{color:"#5b6776",font:{size:11},autoSkip:false,
+                 callback:function(v){return this.getLabelForValue(v).split("\n");}}},
+              y:{grid:{color:"#eef1f5"},ticks:{color:"#5b6776",
+                 callback:v=>(v<0?"−$":"$")+Math.abs(v).toLocaleString()},
+                 title:{display:true,text:"$ per year",color:"#5b6776"}}}}
+  });
 }
-recompute();
+render();
 </script>
 </body>
 </html>
