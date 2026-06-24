@@ -187,9 +187,9 @@
       </div>
       <div class="chartbox"><canvas id="seasonChart"></canvas></div>
       <p class="disclaim">The dashed line is today's residential grid load (2024); the solid line is the
-        load if the chosen number of homes have solar. Solar lowers midday procurement while the rebound
-        nudges up evening and overnight load. At today's roughly 497 solar homes the effect is small;
-        raise the adopter slider to see what wider adoption does to the procurement profile.</p>
+        load if the chosen share of homes have solar. Solar lowers midday procurement while the rebound
+        nudges up evening and overnight load. At today's roughly 6% solar share the effect is small;
+        raise the share slider to see what wider adoption does to the procurement profile.</p>
     </div>
   </section>
 </main>
@@ -242,22 +242,22 @@
        small load <em>increase</em>. The gas reduction is spring-driven and not statistically significant
        over the year, so it is optional here. The load figure is net grid purchases avoided, not gross
        generation. Results are for the Los Alamos / PNM grid and an affluent, high-altitude community with
-       about 5.7% solar penetration, and may not generalize.</p>
+       about 6% solar penetration, and may not generalize.</p>
     <p>Full methodology is in the LADPU solar-rebound study.
        <a href="https://github.com/UNM-EEL">UNM Energy Econ Lab on GitHub &rarr;</a></p>
   </div>
 </div>
 
 <script>
-const D = {"grid_kwh":1573,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_default":497,"n_meters":8646,"seasons":["Spring","Summer","Fall","Winter"],"hours":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],"att_profile":{"Spring":[0.092,0.205,0.195,0.131,0.221,0.208,0.187,0.037,-0.184,-0.462,-0.699,-0.946,-1.084,-1.108,-1.127,-1.063,-0.925,-0.671,-0.368,0.002,0.197,0.123,0.026,0.0],"Summer":[0.229,0.221,0.244,0.313,0.256,0.208,0.139,-0.025,-0.328,-0.712,-0.965,-1.161,-1.295,-1.327,-1.286,-1.241,-1.179,-0.997,-0.751,-0.194,0.366,0.477,0.374,0.285],"Fall":[0.083,0.07,0.078,0.11,0.057,0.093,0.142,0.183,-0.07,-0.399,-0.757,-0.839,-0.965,-0.947,-0.888,-0.786,-0.664,-0.435,-0.017,0.332,0.372,0.199,0.086,0.063],"Winter":[0.297,0.305,0.283,0.385,0.344,0.379,0.376,0.409,0.243,-0.37,-0.713,-0.804,-0.955,-0.906,-0.796,-0.602,-0.377,0.147,0.457,0.591,0.575,0.432,0.363,0.373]},"base_profile":{"Spring":[0.6275,0.591,0.5761,0.6346,0.5798,0.6065,0.6687,0.8151,0.9362,0.9326,0.8624,0.8154,0.7926,0.7716,0.7339,0.7032,0.6945,0.7339,0.8151,0.8985,0.9481,0.9526,0.8801,0.7661],"Summer":[0.6937,0.6208,0.5832,0.6778,0.5377,0.533,0.55,0.6244,0.708,0.7428,0.7425,0.7801,0.8205,0.9053,0.9688,1.0041,1.0327,1.0744,1.1386,1.1749,1.159,1.1226,1.0337,0.892],"Fall":[0.5556,0.5254,0.5034,0.5511,0.4955,0.5114,0.5554,0.6896,0.8487,0.8517,0.816,0.7672,0.7329,0.7181,0.703,0.6903,0.6895,0.7402,0.8332,0.8928,0.8955,0.8605,0.7797,0.6743],"Winter":[0.8168,0.7851,0.7791,0.8229,0.7882,0.8214,0.8874,1.0391,1.2574,1.2411,1.1629,1.0929,1.0278,0.9591,0.9104,0.881,0.856,0.9536,1.1479,1.2165,1.1966,1.156,1.0661,0.9466]},"co2_elec_hs":899.87,"co2_gas_hs":78.04,"co2_theo_hs":3915.17};
+const D = {"grid_kwh":1573,"grid_kwh_se":498.876,"Z":1.96,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_meters":8646,"seasons":["Spring","Summer","Fall","Winter"],"hours":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],"att_profile":{"Spring":[0.092,0.205,0.195,0.131,0.221,0.208,0.187,0.037,-0.184,-0.462,-0.699,-0.946,-1.084,-1.108,-1.127,-1.063,-0.925,-0.671,-0.368,0.002,0.197,0.123,0.026,0.0],"Summer":[0.229,0.221,0.244,0.313,0.256,0.208,0.139,-0.025,-0.328,-0.712,-0.965,-1.161,-1.295,-1.327,-1.286,-1.241,-1.179,-0.997,-0.751,-0.194,0.366,0.477,0.374,0.285],"Fall":[0.083,0.07,0.078,0.11,0.057,0.093,0.142,0.183,-0.07,-0.399,-0.757,-0.839,-0.965,-0.947,-0.888,-0.786,-0.664,-0.435,-0.017,0.332,0.372,0.199,0.086,0.063],"Winter":[0.297,0.305,0.283,0.385,0.344,0.379,0.376,0.409,0.243,-0.37,-0.713,-0.804,-0.955,-0.906,-0.796,-0.602,-0.377,0.147,0.457,0.591,0.575,0.432,0.363,0.373]},"base_profile":{"Spring":[0.6275,0.591,0.5761,0.6346,0.5798,0.6065,0.6687,0.8151,0.9362,0.9326,0.8624,0.8154,0.7926,0.7716,0.7339,0.7032,0.6945,0.7339,0.8151,0.8985,0.9481,0.9526,0.8801,0.7661],"Summer":[0.6937,0.6208,0.5832,0.6778,0.5377,0.533,0.55,0.6244,0.708,0.7428,0.7425,0.7801,0.8205,0.9053,0.9688,1.0041,1.0327,1.0744,1.1386,1.1749,1.159,1.1226,1.0337,0.892],"Fall":[0.5556,0.5254,0.5034,0.5511,0.4955,0.5114,0.5554,0.6896,0.8487,0.8517,0.816,0.7672,0.7329,0.7181,0.703,0.6903,0.6895,0.7402,0.8332,0.8928,0.8955,0.8605,0.7797,0.6743],"Winter":[0.8168,0.7851,0.7791,0.8229,0.7882,0.8214,0.8874,1.0391,1.2574,1.2411,1.1629,1.0929,1.0278,0.9591,0.9104,0.881,0.856,0.9536,1.1479,1.2165,1.1966,1.156,1.0661,0.9466]},"co2_elec_hs":899.87,"co2_gas_hs":78.04,"co2_theo_hs":3915.17};
 const fmt = n => Math.round(n).toLocaleString();
 const fmt1 = n => (Math.round(n*10)/10).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:1});
 
-function defaults(){ return {n:D.n_default, ef_elec:D.ef_elec, ef_gas:D.ef_gas, gas:1, method:"study", season:"Summer"}; }
+function defaults(){ return {share:6, ef_elec:D.ef_elec, ef_gas:D.ef_gas, gas:1, method:"study", season:"Summer"}; }
 let s = defaults();
 
 function compute(){
-  const n = s.n;
+  const n = Math.round(s.share/100 * D.n_meters);
   const loadMWh = n * D.grid_kwh / 1000;
   const gasTherms = n * D.gas_therms;
   const study = s.method === "study";
@@ -268,7 +268,11 @@ function compute(){
   const co2_gas = !s.gas ? 0 : (study ? n * D.co2_gas_hs : n * D.gas_therms * s.ef_gas);
   const theo_elec = study ? n * D.co2_theo_hs : n * D.gross_gen * s.ef_elec;       // 1:1 offset, no rebound
   const co2_t = (co2_elec + co2_gas) / 1000;             // metric tons/yr
-  return {n, loadMWh, gasTherms, co2_elec, co2_gas, co2_t,
+  // 95% CI from the grid ATT standard error (the rebound is the dominant uncertainty)
+  const rel = D.Z * D.grid_kwh_se / D.grid_kwh;
+  const load_lo = loadMWh*(1-rel), load_hi = loadMWh*(1+rel);
+  const co2_lo = (co2_elec*(1-rel) + co2_gas)/1000, co2_hi = (co2_elec*(1+rel) + co2_gas)/1000;
+  return {n, loadMWh, gasTherms, co2_elec, co2_gas, co2_t, load_lo, load_hi, co2_lo, co2_hi,
           realized_elec_t: co2_elec/1000, theo_elec_t: theo_elec/1000};
 }
 
@@ -277,13 +281,12 @@ function render(){
   const c = compute();
   document.getElementById("co2Val").textContent = "≈ " + fmt(c.co2_t) + " t CO₂ / year";
   document.getElementById("co2Sub").textContent =
-    "for " + fmt(c.n) + " solar homes (" + fmt1(c.n/D.n_meters*100) + "% of meters)"
-    + " · about " + fmt(c.co2_t/c.n*1000) + " kg per home";
+    "if " + fmt1(s.share) + "% of homes have solar · 95% CI " + fmt(c.co2_lo) + "–" + fmt(c.co2_hi) + " t/yr";
 
   document.getElementById("cards").innerHTML = [
-    `<div class="card"><div class="k">Electricity load</div><div class="v elec">−${fmt(c.loadMWh)} MWh</div><div class="d">grid purchases avoided / yr</div></div>`,
+    `<div class="card"><div class="k">Electricity load</div><div class="v elec">−${fmt(c.loadMWh)} MWh</div><div class="d">grid avoided/yr · 95% CI ${fmt(c.load_lo)}–${fmt(c.load_hi)}</div></div>`,
     `<div class="card"><div class="k">Natural gas</div><div class="v gas">${s.gas?"−"+fmt(c.gasTherms)+" therms":"—"}</div><div class="d">${s.gas?"reduced / yr (spring-driven)":"gas effect off"}</div></div>`,
-    `<div class="card"><div class="k">CO₂ avoided</div><div class="v co2">${fmt(c.co2_t)} t</div><div class="d">per year · realized, after rebound</div></div>`,
+    `<div class="card"><div class="k">CO₂ avoided</div><div class="v co2">${fmt(c.co2_t)} t</div><div class="d">per year · 95% CI ${fmt(c.co2_lo)}–${fmt(c.co2_hi)} t</div></div>`,
   ].join("");
 
   document.getElementById("disclaim").textContent =
@@ -306,7 +309,7 @@ function render(){
     seasonChart.data.datasets = [
       {label:"Current load (2024)", data:base, borderColor:"#9aa7b4", borderWidth:2, borderDash:[5,4],
         pointRadius:0, tension:.35, fill:false},
-      {label:"With "+fmt(c.n)+" solar homes", data:wsolar, borderColor:"#37618e", backgroundColor:"#37618e18",
+      {label:"With "+fmt1(s.share)+"% solar", data:wsolar, borderColor:"#37618e", backgroundColor:"#37618e18",
         borderWidth:2.6, pointRadius:0, tension:.35, fill:"-1"},
     ];
     document.getElementById("seasonName").textContent = "— " + sn;
@@ -336,8 +339,8 @@ function numRow(box, label, unit, get, set, step){
 let efInput;
 function buildControls(){
   const ab=document.getElementById("adoptBox"); ab.innerHTML="";
-  slider(ab,"Households adopting solar",0,D.n_meters,50,()=>s.n,v=>s.n=v,
-    v=>fmt(v)+" homes", v=>(v/D.n_meters*100).toFixed(1)+"% of meters · today ≈ "+fmt(D.n_default));
+  slider(ab,"Share of homes with solar",0,100,1,()=>s.share,v=>s.share=v,
+    v=>v.toFixed(0)+"%", ()=>"today about 6% of homes have solar");
   const eb=document.getElementById("efBox"); eb.innerHTML="";
   efInput = numRow(eb,"Grid emission factor","kg CO₂/kWh",()=>s.ef_elec,v=>s.ef_elec=v,0.01);
   const gb=document.getElementById("gasEfBox"); gb.innerHTML="";
