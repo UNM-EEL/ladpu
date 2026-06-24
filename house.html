@@ -200,10 +200,13 @@
        under &ldquo;Adjust to your home.&rdquo; A heat pump for space or water heating is assumed; the
        added electricity already reflects that efficiency, not plain resistance heating.</p>
 
-    <h3>Rooftop solar</h3>
+    <h3>Rooftop solar (net billing)</h3>
     <p>Adding solar lowers the electricity you buy from the grid by about <b id="aboutSolar"></b> kWh per
-       year for a typical Los Alamos system (the measured average), valued at the off-peak rate because
-       panels generate mostly midday. You can change this figure.</p>
+       year for a typical Los Alamos system (the measured average). LADPU uses <em>net billing</em>: the
+       solar you use in your own home offsets power at the off-peak retail rate, while the excess you
+       export to the grid is credited at the lower wholesale rate (about $<b id="aboutWhole"></b>/kWh).
+       The tool values the offset as that blend; set the self-consumed share and the wholesale rate to
+       match your system.</p>
 
     <h3>Reading your gas in CCF</h3>
     <p>Your gas meter and bill are in CCF (hundred cubic feet), so you enter usage in CCF here. The tool
@@ -228,7 +231,7 @@
 </div>
 
 <script>
-const D = {"KWH":{"space":1131,"water":1561,"cooking":537,"dryer":521},"THERMS":{"space":621.2,"water":170.7,"cooking":58.7,"dryer":57.0},"CCF":{"space":773,"water":212,"cooking":73,"dryer":71},"ELEV":{"los_alamos":0.78,"white_rock":0.81},"HEAT":1.03,"SOLAR_KWH":1573,"RATES":{"tou_peak":0.197,"tou_off":0.11,"peak_share":0.4,"flat":0.15,"gas_therm":0.77,"gas_service":13.45}};
+const D = {"KWH":{"space":1131,"water":1561,"cooking":537,"dryer":521},"THERMS":{"space":621.2,"water":170.7,"cooking":58.7,"dryer":57.0},"CCF":{"space":773,"water":212,"cooking":73,"dryer":71},"ELEV":{"los_alamos":0.78,"white_rock":0.81},"HEAT":1.03,"SOLAR_KWH":1573,"RATES":{"tou_peak":0.197,"tou_off":0.11,"peak_share":0.4,"flat":0.15,"gas_therm":0.77,"gas_service":13.45,"wholesale":0.06,"solar_self":0.5}};
 const EU = ["space","water","cooking","dryer"];
 const LBL = {space:"Space heating", water:"Water heater", cooking:"Cooking range", dryer:"Clothes dryer"};
 const fmt = n => Math.round(n).toLocaleString();
@@ -261,7 +264,9 @@ function compute(){
   });
   const solarKwh = s.solar ? s.solar_kwh : 0;
   const eAdd = s.rate==="tou" ? (s.R.peak_share*s.R.tou_peak + (1-s.R.peak_share)*s.R.tou_off) : s.R.flat;
-  const eSolar = s.rate==="tou" ? s.R.tou_off : s.R.flat;   // solar offsets midday ~ off-peak
+  // net billing: self-consumed solar offsets retail (off-peak/flat); exports credited at wholesale
+  const eRetail = s.rate==="tou" ? s.R.tou_off : s.R.flat;
+  const eSolar = s.R.solar_self*eRetail + (1-s.R.solar_self)*s.R.wholesale;
   const addElecCost = addKwh * eAdd;
   const solarSave = solarKwh * eSolar;
   let gasSave = savedTherms * s.R.gas_therm;
@@ -347,6 +352,8 @@ function buildRates(){
   } else {
     numRow(box,"Electricity price","$/kWh",()=>s.R.flat,v=>s.R.flat=v,0.001);
   }
+  numRow(box,"Solar self-consumed","share 0-1",()=>s.R.solar_self,v=>s.R.solar_self=v,0.05);
+  numRow(box,"Wholesale export price","$/kWh",()=>s.R.wholesale,v=>s.R.wholesale=v,0.005);
   numRow(box,"Natural gas price","$/therm",()=>s.R.gas_therm,v=>s.R.gas_therm=v,0.01);
   numRow(box,"Gas service charge","$/month",()=>s.R.gas_service,v=>s.R.gas_service=v,0.5);
 }
@@ -371,6 +378,7 @@ document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
   const ul=document.getElementById("aboutApp");
   ul.innerHTML = EU.map(k=>`<li><b>${LBL[k]}:</b> +${fmt(D.KWH[k])} kWh/yr electricity, −${fmt(D.THERMS[k])} therms/yr gas.</li>`).join("");
   document.getElementById("aboutSolar").textContent = fmt(D.SOLAR_KWH);
+  document.getElementById("aboutWhole").textContent = D.RATES.wholesale.toFixed(2);
   document.getElementById("aboutTpcLA").textContent = (D.ELEV.los_alamos*D.HEAT).toFixed(2);
   document.getElementById("aboutTpcWR").textContent = (D.ELEV.white_rock*D.HEAT).toFixed(2);
 })();
