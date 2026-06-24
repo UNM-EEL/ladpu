@@ -17,7 +17,7 @@ the host `unm-eel.github.io` is left free for the lab's main page.
 
 ## License
 
-© 2024–2026 Yuting Yang, Jamal Mamkhezri, Ahmed A. Jawhari, Jiaqing Zhao, and Benjamin Cornelius.
+© 2024–2026 Yuting Yang and Jamal Mamkhezri.
 
 This work is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
 International (CC BY-NC-ND 4.0)](https://creativecommons.org/licenses/by-nc-nd/4.0/). You may
