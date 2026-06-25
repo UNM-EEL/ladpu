@@ -191,6 +191,14 @@
         nudges up evening and overnight load. At today's roughly 6% solar share the effect is small;
         raise the share slider to see what wider adoption does to the procurement profile.</p>
     </div>
+
+    <div class="panel chartwrap" style="margin-top:16px">
+      <h3>Natural gas reduction by season</h3>
+      <div class="chartbox"><canvas id="gasChart"></canvas></div>
+      <p class="disclaim">Only the spring reduction is statistically significant (solid bar); the other
+        seasons (faded) are not distinguishable from zero, and the annual effect is not significant. The
+        headline gas figure counts the spring effect only. Bars are for the chosen share of homes.</p>
+    </div>
   </section>
 </main>
 
@@ -249,7 +257,7 @@
 </div>
 
 <script>
-const D = {"grid_kwh":1573,"grid_kwh_se":498.876,"Z":1.96,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_meters":8646,"seasons":["Spring","Summer","Fall","Winter"],"hours":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],"att_profile":{"Spring":[0.092,0.205,0.195,0.131,0.221,0.208,0.187,0.037,-0.184,-0.462,-0.699,-0.946,-1.084,-1.108,-1.127,-1.063,-0.925,-0.671,-0.368,0.002,0.197,0.123,0.026,0.0],"Summer":[0.229,0.221,0.244,0.313,0.256,0.208,0.139,-0.025,-0.328,-0.712,-0.965,-1.161,-1.295,-1.327,-1.286,-1.241,-1.179,-0.997,-0.751,-0.194,0.366,0.477,0.374,0.285],"Fall":[0.083,0.07,0.078,0.11,0.057,0.093,0.142,0.183,-0.07,-0.399,-0.757,-0.839,-0.965,-0.947,-0.888,-0.786,-0.664,-0.435,-0.017,0.332,0.372,0.199,0.086,0.063],"Winter":[0.297,0.305,0.283,0.385,0.344,0.379,0.376,0.409,0.243,-0.37,-0.713,-0.804,-0.955,-0.906,-0.796,-0.602,-0.377,0.147,0.457,0.591,0.575,0.432,0.363,0.373]},"base_profile":{"Spring":[0.6275,0.591,0.5761,0.6346,0.5798,0.6065,0.6687,0.8151,0.9362,0.9326,0.8624,0.8154,0.7926,0.7716,0.7339,0.7032,0.6945,0.7339,0.8151,0.8985,0.9481,0.9526,0.8801,0.7661],"Summer":[0.6937,0.6208,0.5832,0.6778,0.5377,0.533,0.55,0.6244,0.708,0.7428,0.7425,0.7801,0.8205,0.9053,0.9688,1.0041,1.0327,1.0744,1.1386,1.1749,1.159,1.1226,1.0337,0.892],"Fall":[0.5556,0.5254,0.5034,0.5511,0.4955,0.5114,0.5554,0.6896,0.8487,0.8517,0.816,0.7672,0.7329,0.7181,0.703,0.6903,0.6895,0.7402,0.8332,0.8928,0.8955,0.8605,0.7797,0.6743],"Winter":[0.8168,0.7851,0.7791,0.8229,0.7882,0.8214,0.8874,1.0391,1.2574,1.2411,1.1629,1.0929,1.0278,0.9591,0.9104,0.881,0.856,0.9536,1.1479,1.2165,1.1966,1.156,1.0661,0.9466]},"co2_elec_hs":899.87,"co2_gas_hs":78.04,"co2_theo_hs":3915.17};
+const D = {"grid_kwh":1573,"grid_kwh_se":498.876,"Z":1.96,"rebound_kwh":1424,"gross_gen":6945,"gas_therms":28.4,"ef_elec":0.4487,"ef_gas":5.291,"ef_avg":0.319,"n_meters":8646,"seasons":["Spring","Summer","Fall","Winter"],"hours":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],"att_profile":{"Spring":[0.092,0.205,0.195,0.131,0.221,0.208,0.187,0.037,-0.184,-0.462,-0.699,-0.946,-1.084,-1.108,-1.127,-1.063,-0.925,-0.671,-0.368,0.002,0.197,0.123,0.026,0.0],"Summer":[0.229,0.221,0.244,0.313,0.256,0.208,0.139,-0.025,-0.328,-0.712,-0.965,-1.161,-1.295,-1.327,-1.286,-1.241,-1.179,-0.997,-0.751,-0.194,0.366,0.477,0.374,0.285],"Fall":[0.083,0.07,0.078,0.11,0.057,0.093,0.142,0.183,-0.07,-0.399,-0.757,-0.839,-0.965,-0.947,-0.888,-0.786,-0.664,-0.435,-0.017,0.332,0.372,0.199,0.086,0.063],"Winter":[0.297,0.305,0.283,0.385,0.344,0.379,0.376,0.409,0.243,-0.37,-0.713,-0.804,-0.955,-0.906,-0.796,-0.602,-0.377,0.147,0.457,0.591,0.575,0.432,0.363,0.373]},"base_profile":{"Spring":[0.6275,0.591,0.5761,0.6346,0.5798,0.6065,0.6687,0.8151,0.9362,0.9326,0.8624,0.8154,0.7926,0.7716,0.7339,0.7032,0.6945,0.7339,0.8151,0.8985,0.9481,0.9526,0.8801,0.7661],"Summer":[0.6937,0.6208,0.5832,0.6778,0.5377,0.533,0.55,0.6244,0.708,0.7428,0.7425,0.7801,0.8205,0.9053,0.9688,1.0041,1.0327,1.0744,1.1386,1.1749,1.159,1.1226,1.0337,0.892],"Fall":[0.5556,0.5254,0.5034,0.5511,0.4955,0.5114,0.5554,0.6896,0.8487,0.8517,0.816,0.7672,0.7329,0.7181,0.703,0.6903,0.6895,0.7402,0.8332,0.8928,0.8955,0.8605,0.7797,0.6743],"Winter":[0.8168,0.7851,0.7791,0.8229,0.7882,0.8214,0.8874,1.0391,1.2574,1.2411,1.1629,1.0929,1.0278,0.9591,0.9104,0.881,0.856,0.9536,1.1479,1.2165,1.1966,1.156,1.0661,0.9466]},"gas_season":{"Spring":{"therms":-28.44,"sig":true},"Summer":{"therms":-3.45,"sig":false},"Fall":{"therms":-20.88,"sig":false},"Winter":{"therms":1.56,"sig":false}},"co2_elec_hs":899.87,"co2_gas_hs":78.04,"co2_theo_hs":3915.17};
 const fmt = n => Math.round(n).toLocaleString();
 const fmt1 = n => (Math.round(n*10)/10).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:1});
 
@@ -276,7 +284,7 @@ function compute(){
           realized_elec_t: co2_elec/1000, theo_elec_t: theo_elec/1000};
 }
 
-let co2Chart, seasonChart;
+let co2Chart, seasonChart, gasChart;
 function render(){
   const c = compute();
   document.getElementById("co2Val").textContent = "≈ " + fmt(c.co2_t) + " t CO₂ / year";
@@ -314,6 +322,13 @@ function render(){
     ];
     document.getElementById("seasonName").textContent = "— " + sn;
     seasonChart.update();
+  }
+  if(gasChart){
+    const bars = D.seasons.map(season=>D.gas_season[season].therms * c.n);
+    const bg = D.seasons.map(season=>D.gas_season[season].sig ? "#d98c3f" : "#d98c3f3a");
+    gasChart.data.labels = D.seasons;
+    gasChart.data.datasets = [{data:bars, backgroundColor:bg, borderRadius:4, borderWidth:0, maxBarThickness:64}];
+    gasChart.update();
   }
 }
 
@@ -408,6 +423,16 @@ if(typeof Chart !== "undefined"){
                  title:{display:true,text:"hour of day",color:"#5b6776"}},
               y:{grid:{color:"#eef1f5"},ticks:{color:"#5b6776",callback:v=>v.toLocaleString()},
                  title:{display:true,text:"residential grid load (MW)",color:"#5b6776"}}}}
+  });
+  gasChart = new Chart(document.getElementById("gasChart"), {
+    type:"bar", data:{labels:[],datasets:[]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>{const sn=D.seasons[c.dataIndex];
+          return (c.raw>=0?"+":"")+Math.round(c.raw).toLocaleString()+" therms/yr"+(D.gas_season[sn].sig?"":" (not significant)");}}}},
+      scales:{x:{grid:{display:false},ticks:{color:"#5b6776",font:{size:12}}},
+              y:{grid:{color:"#eef1f5"},ticks:{color:"#5b6776",callback:v=>v.toLocaleString()},
+                 title:{display:true,text:"therms / year (− = reduction)",color:"#5b6776"}}}}
   });
 }
 render();
