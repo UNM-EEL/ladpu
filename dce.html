@@ -123,6 +123,15 @@
     <h2>2. Target population</h2>
     <div id="popBox"></div>
 
+    <h2>3. Value basis</h2>
+    <div class="toggle" id="calToggle">
+      <button data-cal="0" class="on">Stated (survey)</button>
+      <button data-cal="1">Calibrated (&divide;1.94)</button>
+    </div>
+    <p class="hint" style="margin-top:8px">Stated WTP from hypothetical surveys typically runs about
+       twice real WTP. &ldquo;Calibrated&rdquo; divides every dollar figure by the Penn &amp; Hu (2018)
+       meta-analysis factor of 1.94, moving values toward revealed-preference benchmarks.</p>
+
     <details>
       <summary>Advanced</summary>
       <div class="toggle" id="infoToggle" style="margin-top:10px">
@@ -130,7 +139,9 @@
         <button data-info="1">With info nudge</button>
       </div>
       <p class="hint" style="margin-top:8px">The survey's information treatment had no statistically
-         significant effect on WTP; included only for exploration.</p>
+         significant effect on WTP once environmental concern is controlled. Treated respondents were
+         also about twice as likely to start the choice tasks without finishing them, so the null may
+         partly reflect selective attrition. Included only for exploration.</p>
     </details>
 
     <button class="reset" id="reset">Restore the study scenario</button>
@@ -186,7 +197,10 @@
       <li><b>Energy efficiency</b> (0&ndash;50%): how much more efficient the electric appliances are.
           The most valued feature, about <b id="aboutEff"></b>/month per point.</li>
       <li><b>Rebate</b> (0&ndash;75%): the share of up-front cost covered by incentives. Worth about
-          <b id="aboutRebate"></b>/month per point.</li>
+          <b id="aboutRebate"></b>/month per point. Treat this as a program-design lever, not money
+          currently on the table: the federal 25C/25D tax credits ended for equipment placed in service
+          after December&nbsp;31,&nbsp;2025, and New Mexico's Home Energy Rebates remain open only to
+          income-qualified households (below 80% of area median income).</li>
     </ul>
 
     <h3>Who is paying</h3>
@@ -194,6 +208,17 @@
        sharply when a household needs an <b>electrical panel upgrade</b> to electrify. The panel-upgrade
        penalty is large: it lowers feature WTP and adds a roughly $68/month hurdle to adopting at all.
        About 79% of the sampled homes needed an upgrade. Set the share to match your service area.</p>
+    <p><b>Retired households</b> (about a third of the sample) value the program features the same as
+       everyone else &mdash; their attribute WTP is statistically indistinguishable from non-retirees'
+       &mdash; and the fixed-income reluctance to switch operates through the age and income effects
+       already in the model, so no separate retiree setting is needed here.</p>
+
+    <h3>Stated vs. calibrated values</h3>
+    <p>The &ldquo;Value basis&rdquo; toggle offers two readings of every dollar figure. <b>Stated</b> is
+       the survey-elicited value as estimated. <b>Calibrated</b> divides by 1.94, the trimmed-sample mean
+       ratio of hypothetical to real willingness to pay in the Penn &amp; Hu (2018) meta-analysis, moving
+       the figures toward revealed-preference benchmarks (e.g., the efficiency value falls from about
+       $2.31 to about $1.19 per month per point). The truth for any one program likely lies between.</p>
 
     <h3>Important limits</h3>
     <p>These are <em>stated</em> values from a hypothetical survey. The paper notes the stated WTP for a
@@ -208,7 +233,7 @@
 </div>
 
 <script>
-const D = {"beta":{"carbon":1.494,"efficiency":2.308,"rebate":1.098},"nep":{"carbon":0.794,"efficiency":0.693,"rebate":0.368},"panel":{"carbon":-0.894,"efficiency":-0.8,"rebate":0.323},"info":{"carbon":0.034,"efficiency":0.257,"rebate":-0.224},"max":{"carbon":100,"efficiency":50,"rebate":75},"scenario":{"carbon":66,"efficiency":50,"rebate":50},"nep_pct":{"P10":-1.462,"P25":-0.867,"P50":0.16,"P75":0.911,"P90":1.111},"nep_default":0.16,"panel_share_default":0.787};
+const D = {"beta":{"carbon":1.494,"efficiency":2.308,"rebate":1.098},"nep":{"carbon":0.794,"efficiency":0.693,"rebate":0.368},"panel":{"carbon":-0.894,"efficiency":-0.8,"rebate":0.323},"info":{"carbon":0.034,"efficiency":0.257,"rebate":-0.224},"max":{"carbon":100,"efficiency":50,"rebate":75},"scenario":{"carbon":66,"efficiency":50,"rebate":50},"nep_pct":{"P10":-1.462,"P25":-0.867,"P50":0.16,"P75":0.911,"P90":1.111},"nep_default":0.16,"panel_share_default":0.787,"cf":1.94};
 const ATT = ["carbon","efficiency","rebate"];
 const LBL = {carbon:"Carbon reduction", efficiency:"Energy efficiency", rebate:"Rebate"};
 const COL = {carbon:"#5a9e6f", efficiency:"#37618e", rebate:"#d98c3f"};
@@ -217,7 +242,7 @@ const money0 = n => "$" + Math.round(n).toLocaleString();
 
 function defaults(){
   return {carbon:D.scenario.carbon, efficiency:D.scenario.efficiency, rebate:D.scenario.rebate,
-          nep:D.nep_default, panel_share:D.panel_share_default, info:0};
+          nep:D.nep_default, panel_share:D.panel_share_default, info:0, cal:0};
 }
 let s = defaults();
 
@@ -227,8 +252,9 @@ function perPoint(k){
   return s.panel_share*at(1) + (1-s.panel_share)*at(0);
 }
 function compute(){
+  const scale = s.cal ? 1/D.cf : 1;
   const per={}, contrib={}; let total=0;
-  ATT.forEach(k=>{ per[k]=perPoint(k); contrib[k]=per[k]*s[k]; total+=contrib[k]; });
+  ATT.forEach(k=>{ per[k]=perPoint(k)*scale; contrib[k]=per[k]*s[k]; total+=contrib[k]; });
   return {per, contrib, total};
 }
 
@@ -236,6 +262,11 @@ function compute(){
 let wtpChart;
 function render(){
   const c = compute();
+  document.querySelector(".headline .lab").textContent =
+    s.cal ? "Estimated average calibrated WTP" : "Estimated average stated WTP";
+  document.getElementById("totSub").textContent = s.cal
+    ? "per household, per month, for this program (stated ÷ 1.94 for hypothetical bias)"
+    : "per household, per month, for this program";
   document.getElementById("totVal").textContent = "≈ " + money0(c.total) + " / month";
 
   document.getElementById("cards").innerHTML = ATT.map(k=>{
@@ -291,8 +322,13 @@ document.querySelectorAll("#infoToggle button").forEach(b=>b.addEventListener("c
   s.info=parseInt(b.dataset.info); document.querySelectorAll("#infoToggle button").forEach(x=>x.classList.toggle("on",x===b));
   render();
 }));
+document.querySelectorAll("#calToggle button").forEach(b=>b.addEventListener("click",()=>{
+  s.cal=parseInt(b.dataset.cal); document.querySelectorAll("#calToggle button").forEach(x=>x.classList.toggle("on",x===b));
+  render();
+}));
 document.getElementById("reset").addEventListener("click",()=>{ s=defaults();
   document.querySelectorAll("#infoToggle button").forEach(x=>x.classList.toggle("on",x.dataset.info==="0"));
+  document.querySelectorAll("#calToggle button").forEach(x=>x.classList.toggle("on",x.dataset.cal==="0"));
   buildControls(); render(); });
 
 // about modal
