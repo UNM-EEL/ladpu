@@ -123,14 +123,14 @@
     <h2>2. Target population</h2>
     <div id="popBox"></div>
 
-    <h2>3. Value basis</h2>
+    <h2>3. How to read the dollars</h2>
     <div class="toggle" id="calToggle">
-      <button data-cal="0" class="on">Stated (survey)</button>
-      <button data-cal="1">Calibrated (&divide;1.94)</button>
+      <button data-cal="0" class="on">What they said</button>
+      <button data-cal="1">Realistic estimate</button>
     </div>
-    <p class="hint" style="margin-top:8px">Stated WTP from hypothetical surveys typically runs about
-       twice real WTP. &ldquo;Calibrated&rdquo; divides every dollar figure by the Penn &amp; Hu (2018)
-       meta-analysis factor of 1.94, moving values toward revealed-preference benchmarks.</p>
+    <p class="hint" style="margin-top:8px">People in surveys typically say they would pay about twice
+       what they actually pay. &ldquo;Realistic estimate&rdquo; halves the survey numbers to correct for
+       that, based on a published study of over 100 experiments (details under About).</p>
 
     <details>
       <summary>Advanced</summary>
@@ -138,10 +138,10 @@
         <button data-info="0" class="on">No information nudge</button>
         <button data-info="1">With info nudge</button>
       </div>
-      <p class="hint" style="margin-top:8px">The survey's information treatment had no statistically
-         significant effect on WTP once environmental concern is controlled. Treated respondents were
-         also about twice as likely to start the choice tasks without finishing them, so the null may
-         partly reflect selective attrition. Included only for exploration.</p>
+      <p class="hint" style="margin-top:8px">Showing households information about the health and climate
+         effects of gas made no clear difference to what they would pay. One caution: people who saw the
+         message were also twice as likely to quit the survey partway, so those most put off by it may
+         simply have left rather than shrugged it off. Included only for exploration.</p>
     </details>
 
     <button class="reset" id="reset">Restore the study scenario</button>
@@ -197,10 +197,10 @@
       <li><b>Energy efficiency</b> (0&ndash;50%): how much more efficient the electric appliances are.
           The most valued feature, about <b id="aboutEff"></b>/month per point.</li>
       <li><b>Rebate</b> (0&ndash;75%): the share of up-front cost covered by incentives. Worth about
-          <b id="aboutRebate"></b>/month per point. Treat this as a program-design lever, not money
-          currently on the table: the federal 25C/25D tax credits ended for equipment placed in service
-          after December&nbsp;31,&nbsp;2025, and New Mexico's Home Energy Rebates remain open only to
-          income-qualified households (below 80% of area median income).</li>
+          <b id="aboutRebate"></b>/month per point. Treat this as a program-design dial, not money
+          currently on the table: the federal home-electrification tax credits (Sections 25C and 25D)
+          ended for equipment installed after December&nbsp;31,&nbsp;2025, and New Mexico's Home Energy
+          Rebates now serve only lower-income households (below 80% of the area's median income).</li>
     </ul>
 
     <h3>Who is paying</h3>
@@ -208,17 +208,18 @@
        sharply when a household needs an <b>electrical panel upgrade</b> to electrify. The panel-upgrade
        penalty is large: it lowers feature WTP and adds a roughly $68/month hurdle to adopting at all.
        About 79% of the sampled homes needed an upgrade. Set the share to match your service area.</p>
-    <p><b>Retired households</b> (about a third of the sample) value the program features the same as
-       everyone else &mdash; their attribute WTP is statistically indistinguishable from non-retirees'
-       &mdash; and the fixed-income reluctance to switch operates through the age and income effects
-       already in the model, so no separate retiree setting is needed here.</p>
+    <p><b>Retired households</b> (about a third of the sample) value the program features essentially
+       the same as everyone else. The reluctance of fixed-income households to take on big-ticket
+       changes shows up through age and income, which the tool already accounts for, so there is no
+       separate retiree setting.</p>
 
-    <h3>Stated vs. calibrated values</h3>
-    <p>The &ldquo;Value basis&rdquo; toggle offers two readings of every dollar figure. <b>Stated</b> is
-       the survey-elicited value as estimated. <b>Calibrated</b> divides by 1.94, the trimmed-sample mean
-       ratio of hypothetical to real willingness to pay in the Penn &amp; Hu (2018) meta-analysis, moving
-       the figures toward revealed-preference benchmarks (e.g., the efficiency value falls from about
-       $2.31 to about $1.19 per month per point). The truth for any one program likely lies between.</p>
+    <h3>&ldquo;What they said&rdquo; vs. &ldquo;realistic estimate&rdquo;</h3>
+    <p>The toggle in the sidebar offers two readings of every dollar figure. <b>What they said</b> shows
+       the survey answers as given. <b>Realistic estimate</b> divides them by 1.94, because a large study
+       comparing surveys against real purchases (Penn &amp; Hu, 2018, covering over 100 experiments)
+       found people say they will pay roughly twice what they actually do. For example, the energy
+       efficiency value falls from about $2.31 to about $1.19 per month per point. The true value for
+       any one program most likely lies between the two readings.</p>
 
     <h3>Important limits</h3>
     <p>These are <em>stated</em> values from a hypothetical survey. The paper notes the stated WTP for a
@@ -263,10 +264,10 @@ let wtpChart;
 function render(){
   const c = compute();
   document.querySelector(".headline .lab").textContent =
-    s.cal ? "Estimated average calibrated WTP" : "Estimated average stated WTP";
+    s.cal ? "Realistic estimate of household value" : "What households said it is worth";
   document.getElementById("totSub").textContent = s.cal
-    ? "per household, per month, for this program (stated ÷ 1.94 for hypothetical bias)"
-    : "per household, per month, for this program";
+    ? "per household, per month, for this program (survey figures halved to correct for overstatement)"
+    : "per household, per month, for this program (taken directly from the survey)";
   document.getElementById("totVal").textContent = "≈ " + money0(c.total) + " / month";
 
   document.getElementById("cards").innerHTML = ATT.map(k=>{
