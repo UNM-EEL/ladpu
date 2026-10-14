@@ -90,6 +90,8 @@
   .headline .lab{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
   .headline .val{font-size:34px;font-weight:700;margin:4px 0 2px}
   .headline .sub{font-size:13px;color:var(--muted)}
+  .headline .mo{font-size:19px;font-weight:600;margin:0 0 6px}
+  .mo.save{color:var(--save)} .mo.cost{color:var(--cost)} .mo:empty{display:none}
   .val.save{color:var(--save)} .val.cost{color:var(--cost)}
   .billcmp{font-size:14.5px;margin-top:10px;color:var(--ink)} .billcmp:empty{display:none}
   .billcmp b.save{color:var(--save)} .billcmp b.cost{color:var(--cost)}
@@ -174,6 +176,7 @@
       <div class="big">
         <div class="lab">Estimated change to your yearly energy bill</div>
         <div class="val" id="netVal">&mdash;</div>
+        <div class="mo" id="netMo"></div>
         <div class="sub" id="netSub"></div>
         <div class="billcmp" id="billCmp"></div>
       </div>
@@ -314,6 +317,11 @@ function render(){
   else if(c.net > 0){ nv.className="val cost"; nv.textContent = "≈ "+money(c.net)+" higher / year";
     ns.textContent = "Estimated increase at current rates. Your actual bill depends on your home, equipment, and usage."; }
   else { nv.className="val"; nv.textContent = "About the same"; ns.textContent="Estimated, at current rates."; }
+  // the same change per month (yearly figure / 12)
+  const nm = document.getElementById("netMo");
+  nm.className = "mo " + (c.net<0 ? "save" : "cost");
+  const mo = Math.abs(c.net)/12;
+  nm.textContent = c.net===0 ? "" : (mo<0.5 ? "less than $1" : "≈ "+money(mo))+(c.net<0?" lower":" higher")+" / month";
 
   document.getElementById("cards").innerHTML = [
     `<div class="card"><div class="k">Electricity</div><div class="v elec">≈ +${fmt(c.addKwh)} kWh</div><div class="d">more per year &middot; about +${money(c.addElecCost)}/yr</div></div>`,
